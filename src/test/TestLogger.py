@@ -91,19 +91,32 @@ class LoggerTest(unittest.TestCase):
     # Test Format Set
     #
     def test_format_set(self):
+        # @important The order of the items in the set is not guaranteed, so multiple expected
+
         st = {
             's1',
             's2',
             's3',
         }
 
-        expected = '''{
-\t"s1",
-\t"s2",
-\t"s3",
-}'''
+        expected_posibilities = []
 
-        self.assertEqual(Logger.format_set(st), expected)
+        unordered_lines = [
+            '\t"s1"',
+            '\t"s2"',
+            '\t"s3"',
+        ]
+
+        number_of_lines = len(unordered_lines)
+
+        # Create an expected value for each permutation of the lines
+        for i in range(number_of_lines):
+            for j in range(number_of_lines):
+                for k in range(number_of_lines):
+                    if i != j and i != k and j != k:
+                        expected_posibilities.append('{\n' + unordered_lines[i] + ',\n' + unordered_lines[j] + ',\n' + unordered_lines[k] + ',\n}')
+
+        self.assertIn(Logger.format_set(st), expected_posibilities)
 
 
     #
