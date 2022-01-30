@@ -1,4 +1,4 @@
-from mixin.OptionMixin import OptionMixin
+from sserver.mixin.OptionMixin import OptionMixin
 
 class BaseEndpoint(OptionMixin):
 

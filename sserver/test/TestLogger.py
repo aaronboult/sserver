@@ -1,8 +1,7 @@
-from distutils.log import Log
 import unittest
 
-# Imports
-from log.Logger import Logger
+# Package Imports
+from sserver.log.Logger import Logger
 
 class LoggerTest(unittest.TestCase):
 
