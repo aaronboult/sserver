@@ -1,0 +1,1 @@
+from sserver.server import application
