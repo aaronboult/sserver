@@ -1,3 +1,4 @@
+#!/bin/bash
 # Run unittests
-cd ./src/
+cd ./sserver/
 python -m unittest discover --start-directory ./test/ --pattern "Test*.py"
