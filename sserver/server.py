@@ -126,6 +126,7 @@ def application(environment, start_response):
 #
 def load_urls():
 
+    Logger.label('Clearing Cache')
     uwsgi.cache_clear()
 
     url_modules = ModuleTools.load_from_filename('urls.py', fromlist=['urls'])
