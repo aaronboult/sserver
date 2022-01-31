@@ -1,6 +1,9 @@
-from os import environ
 from sserver.log.Logger import Logger
 from sserver.mixin.OptionMixin import OptionMixin
+from sserver.tool.ModuleTools import ModuleTools
+from os import system
+from pickle import loads, dumps
+import uwsgi
 
 
 #
@@ -104,6 +107,9 @@ class Server(OptionMixin):
         }
 
 
+#
+# Application
+#
 def application(environment, start_response):
     server = Server()
 
@@ -113,3 +119,25 @@ def application(environment, start_response):
     })
 
     return server.handle_request()
+
+
+#
+# Load URLs
+#
+def load_urls():
+
+    uwsgi.cache_clear()
+
+    url_modules = ModuleTools.load_from_filename('urls.py', fromlist=['urls'])
+
+    Logger.label('Loading URLs')
+    for module in url_modules:
+        urls = ModuleTools.get_from_module(module, 'urls', [])
+
+        for url in urls:
+            uwsgi.cache_update(url.url, dumps(url))
+
+            Logger.log('cache', str(uwsgi.cache_get(url.url)))
+
+
+load_urls()
