@@ -1,5 +1,8 @@
 import sys
 
+class __Empty__:
+    pass
+
 class Logger:
 
 
@@ -15,14 +18,30 @@ class Logger:
     # @param dict context (optional) Context to go along with text
     #
     @classmethod
-    def log(cls, text, context = None):
+    def log(cls, text, context = __Empty__):
         
         sys.stdout.write(cls.format(text))
 
-        if context is not None:
+        if not isinstance(context, __Empty__):
             sys.stdout.write(cls.delimiter + cls.format(context))
 
         sys.stdout.write('\n')
+    
+
+    #
+    # Label
+    # @param str text The text to label
+    #
+    @classmethod
+    def label(cls, text):
+
+        length = len(text)
+
+        hash_bars = '#' * (length + 4)
+
+        text = f'\n{hash_bars}\n# {text} #\n{hash_bars}\n\n'
+
+        sys.stdout.write(text)
 
 
     #
