@@ -2,6 +2,8 @@
 *.pyc
 *.pyo
 
+__pycache__/
+
 build/
 dist/
 SServer.egg-info/
