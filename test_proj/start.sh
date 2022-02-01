@@ -6,4 +6,4 @@ clear
 cd /sserver/test_proj/
 
 # Start server
-uwsgi --http :80 --wsgi-file=server.py --socket=tmp/__main__.sock --uid=www-data --gid=www-data --chmod-socket=644 --master --cache2 name=__main__,items=100 -storedelete
+uwsgi uwsgi.ini
