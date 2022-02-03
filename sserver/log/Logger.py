@@ -1,8 +1,16 @@
 import sys
 
+
+#
+# Empty Placeholder
+#
 class __Empty__:
     pass
 
+
+#
+# Logger
+#
 class Logger:
 
 
@@ -33,7 +41,7 @@ class Logger:
     # @param str text The text to label
     #
     @classmethod
-    def label(cls, text):
+    def label(cls, text, context = __Empty__):
 
         length = len(text)
 
@@ -42,6 +50,28 @@ class Logger:
         text = f'\n{hash_bars}\n# {text} #\n{hash_bars}\n\n'
 
         sys.stdout.write(text)
+
+        if context != __Empty__:
+            sys.stdout.write(cls.format(context))
+    
+
+    #
+    # Exception
+    # @param Error error The error to log
+    #
+    @classmethod
+    def exception(cls, error):
+        cls.label(f'Exception')
+        cls.log(str(error))
+        cls.linebreak()
+    
+
+    #
+    # Linebreak
+    #
+    @classmethod
+    def linebreak(cls, count = 1):
+        sys.stdout.write('\n' * count)
 
 
     #
