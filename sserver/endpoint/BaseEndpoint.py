@@ -1,33 +1,37 @@
 from sserver.mixin.OptionMixin import OptionMixin
 
+
+#
+# Base Endpoint
+#
 class BaseEndpoint(OptionMixin):
 
     #
     # Get
     #
     def get(self):
-        pass
+        return ''
 
     #
     # Post
     #
     def post(self):
-        pass
+        return ''
 
     #
     # Put
     #
     def put(self):
-        pass
+        return ''
 
     #
     # Patch
     #
     def patch(self):
-        pass
+        return ''
 
     #
     # Delete
     #
     def delete(self):
-        pass
+        return ''
