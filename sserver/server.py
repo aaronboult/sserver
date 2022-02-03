@@ -1,6 +1,7 @@
 from sserver.log.Logger import Logger
 from sserver.mixin.OptionMixin import OptionMixin
 from sserver.tool.ModuleTools import ModuleTools
+from sserver.tool.CacheTools import CacheTools
 from os import system
 from pickle import loads, dumps
 import uwsgi
@@ -75,7 +76,11 @@ class Server(OptionMixin):
     #
     def get_route(self):
 
-        Logger.log(self.getOption('enviroment'))
+        environment = self.getOption('environment')
+
+        uri = environment.get('URI')
+
+        Logger.log('URI', uri)
 
         return None
 
@@ -126,19 +131,17 @@ def application(environment, start_response):
 #
 def load_urls():
 
-    Logger.label('Clearing Cache')
-    uwsgi.cache_clear()
+    CacheTools.clear()
 
-    url_modules = ModuleTools.load_from_filename('urls.py', fromlist=['urls'])
+    route_module_list = ModuleTools.load_from_filename('routes.py', fromlist=['routes'])
 
-    Logger.label('Loading URLs')
-    for module in url_modules:
-        urls = ModuleTools.get_from_module(module, 'urls', [])
+    Logger.log('Loading Routes...')
+    for module in route_module_list:
+        route_list = ModuleTools.get_from_module(module, 'routes', [])
 
-        for url in urls:
-            uwsgi.cache_update(url.url, dumps(url))
-
-            Logger.log('cache', str(uwsgi.cache_get(url.url)))
+        for route in route_list:
+            Logger.log('Found Route {}, handled by {}'.format(route.url, str(route.endpoint)))
+            uwsgi.cache_update(route.url, dumps(route))
 
 
 load_urls()

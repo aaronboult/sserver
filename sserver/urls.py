@@ -1,6 +1,6 @@
 from sserver.log.Logger import Logger
 
-class Url:
+class Route:
     def __init__(self, url, name, endpoint, **kwargs):
         self.url = url
         self.name = name
@@ -11,4 +11,4 @@ class Url:
 # Route
 #
 def route(*args, **kwargs):
-    return Url(*args, **kwargs)
+    return Route(*args, **kwargs)
