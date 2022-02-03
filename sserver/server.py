@@ -67,7 +67,10 @@ class Server(OptionMixin):
             else:
                 return self.handle_route(route)
 
-        except:
+        except Exception as e:
+
+            Logger.exception(e)
+
             return self.handle_500()
 
 
@@ -78,11 +81,11 @@ class Server(OptionMixin):
 
         environment = self.getOption('environment')
 
-        uri = environment.get('URI')
+        uri = environment.get('REQUEST_URI')
 
-        Logger.log('URI', uri)
+        route = CacheTools.deserialize_get(uri)
 
-        return None
+        return route
 
 
     #
@@ -91,6 +94,15 @@ class Server(OptionMixin):
     def handle_404(self):
         return {
             'body' : '404 Not Found',
+        }
+    
+
+    #
+    # Handle 405
+    #
+    def handle_405(self):
+        return {
+            'body' : '405 Method Not Allowed',
         }
     
 
@@ -107,8 +119,33 @@ class Server(OptionMixin):
     # Handle Route
     #
     def handle_route(self, route):
+
+        environment = self.getOption('environment')
+        method = environment.get('REQUEST_METHOD')
+        content = None
+
+        if method == 'GET':
+            content = route.endpoint().get()
+        
+        elif method == 'POST':
+            content = route.endpoint().post()
+        
+        elif method == 'PUT':
+            content = route.endpoint().put()
+        
+        elif method == 'PATCH':
+            content = route.endpoint().patch()
+        
+        elif method == 'DELETE':
+            content = route.endpoint().delete()
+        
+        else:
+            return self.handle_405()
+
+        Logger.log('content', content)
+
         return {
-            'body' : 'Routing',
+            'body' : content,
         }
 
 
