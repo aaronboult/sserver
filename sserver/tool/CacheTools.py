@@ -1,6 +1,16 @@
+from sserver.log.Logger import Logger
 import uwsgi
 
 class CacheTools:
+
+
+    #
+    # Clear Cache
+    #
+    @staticmethod
+    def clear():
+        Logger.log('Clearing cache')
+        uwsgi.cache_clear()
     
     
     #
