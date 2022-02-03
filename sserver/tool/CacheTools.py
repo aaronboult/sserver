@@ -1,6 +1,10 @@
 from sserver.log.Logger import Logger
 import uwsgi
 
+
+#
+# Cache Tools
+#
 class CacheTools:
 
 
@@ -41,8 +45,13 @@ class CacheTools:
     @staticmethod
     def deserialize_get(key):
         from pickle import loads
-        
-        return loads(CacheTools.get(key))
+
+        serialized_value = CacheTools.get(key)
+
+        if serialized_value is not None:
+            return loads(serialized_value)
+
+        return None
 
 
     #
