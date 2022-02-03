@@ -22,7 +22,7 @@ class Logger:
         
         sys.stdout.write(cls.format(text))
 
-        if not isinstance(context, __Empty__):
+        if context != __Empty__:
             sys.stdout.write(cls.delimiter + cls.format(context))
 
         sys.stdout.write('\n')
