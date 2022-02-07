@@ -118,3 +118,22 @@ class CacheTools:
 
         for key, value in values.items():
             CacheTools.set(key, dumps(value))
+    
+
+    #
+    # Delete
+    # @param str key The key to delete
+    #
+    @staticmethod
+    def delete(key):
+        uwsgi.cache_del(key)
+    
+
+    #
+    # Delete Bulk
+    # @param list keys The keys to delete
+    #
+    @staticmethod
+    def delete_bulk(keys):
+        for key in keys:
+            CacheTools.delete(key)
