@@ -1,5 +1,6 @@
 from sserver.log.Logger import Logger
 from sserver.tool.PathTools import PathTools
+import importlib
 
 
 #
@@ -63,11 +64,7 @@ class ModuleTools:
     @staticmethod
     def load_from_path(path, fromlist = []):
         try:
-            module = __import__(path, fromlist = fromlist)
-
-            # @todo If module is namespace, resolve the requested module
-
-            return module
+            return importlib.import_module(path)
 
         except:
             raise ModuleNotFoundError(f'No module found with path: {path}')
@@ -96,6 +93,4 @@ class ModuleTools:
     #
     @staticmethod
     def get_all_from_module(module):
-        
-        Logger.log('Getting all from', module)
-        Logger.log('__dict__', module.__dict__)
+        return module.__dict__
