@@ -1,10 +1,5 @@
 from sserver.log.Logger import Logger
 from sserver.mixin.OptionMixin import OptionMixin
-from sserver.tool.ModuleTools import ModuleTools
-from sserver.tool.CacheTools import CacheTools
-from os import system
-from pickle import loads, dumps
-import uwsgi
 
 
 #
@@ -167,18 +162,13 @@ def application(environment, start_response):
 # Load URLs
 #
 def load_urls():
+    from sserver.tool.CacheTools import CacheTools
+    from sserver.tool.ConfigTools import ConfigTools
+    from sserver.tool.RouteTools import RouteTools
 
     CacheTools.clear()
-
-    route_module_list = ModuleTools.load_from_filename('routes.py', fromlist=['routes'])
-
-    Logger.log('Loading Routes...')
-    for module in route_module_list:
-        route_list = ModuleTools.get_from_module(module, 'routes', [])
-
-        for route in route_list:
-            Logger.log('Found Route {}, handled by {}'.format(route.url, str(route.endpoint)))
-            uwsgi.cache_update(route.url, dumps(route))
+    ConfigTools.load()
+    RouteTools.load()
 
 
 load_urls()
