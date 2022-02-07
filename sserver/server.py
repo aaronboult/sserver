@@ -1,5 +1,8 @@
 from sserver.log.Logger import Logger
 from sserver.mixin.OptionMixin import OptionMixin
+from sserver.tool.CacheTools import CacheTools
+from sserver.tool.ConfigTools import ConfigTools
+from sserver.tool.RouteTools import RouteTools
 
 
 #
@@ -159,16 +162,11 @@ def application(environment, start_response):
 
 
 #
-# Load URLs
+# Initialize Server
 #
-def load_urls():
-    from sserver.tool.CacheTools import CacheTools
-    from sserver.tool.ConfigTools import ConfigTools
-    from sserver.tool.RouteTools import RouteTools
-
+def initialize():
     CacheTools.clear()
     ConfigTools.load()
     RouteTools.load()
 
-
-load_urls()
+initialize()
