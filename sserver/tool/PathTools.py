@@ -1,4 +1,6 @@
 from sserver.log.Logger import Logger
+from os import walk
+from os.path import join
 
 #
 # Path Tools
@@ -13,9 +15,6 @@ class PathTools:
     #
     @staticmethod
     def get_path_to_parent(parent_folder):
-        from os import walk
-        from os.path import join
-
         for root, dirs, files in walk('.'):
             if parent_folder in dirs:
                 return join(root, parent_folder)
@@ -30,8 +29,6 @@ class PathTools:
     #
     @staticmethod
     def get_path_list_to_file(filename):
-        from os import walk
-        from os.path import join
 
         path_list = []
 
