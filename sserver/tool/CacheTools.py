@@ -16,16 +16,33 @@ class CacheTools:
         Logger.log('Clearing cache')
         uwsgi.cache_clear()
     
-    
+
+    #
+    # Pop
+    # @param str key The key to pop
+    # @returns mixed The value of the key
+    #
+    @staticmethod
+    def pop(key, default = None):
+        value = CacheTools.get(key, default = default)
+        CacheTools.delete(key)
+        return value
+
+
     #
     # Get
     # @param str key The key to get
-    # @return mixed The value of the key
+    # @returns mixed The value of the key
     #
     @staticmethod
-    def get(key):
-        return uwsgi.cache_get(key)
-    
+    def get(key, default = None):
+        if key is None:
+            raise TypeError('Cache key cannot be None')
+
+        value = uwsgi.cache_get(key)
+
+        return default if value is None else value
+
 
     #
     # Set
@@ -34,13 +51,16 @@ class CacheTools:
     #
     @staticmethod
     def set(key, value):
+        if key is None:
+            raise TypeError(f'Cache key cannot be None, value : {str(value)}')
+
         uwsgi.cache_update(key, value)
     
 
     #
     # Deserialize Get
     # @param str key The key to get
-    # @return mixed The deserialized object
+    # @returns mixed The deserialized object
     #
     @staticmethod
     def deserialize_get(key):
@@ -69,7 +89,7 @@ class CacheTools:
     #
     # Get Bulk
     # @param list keys The keys to get
-    # @return dict The keys and values
+    # @returns dict The keys and values
     #
     @staticmethod
     def get_bulk(keys):
@@ -94,7 +114,7 @@ class CacheTools:
     #
     # Deserialize Get Bulk
     # @param list keys The keys to get
-    # @return dict The keys and deserialized values
+    # @returns dict The keys and deserialized values
     #
     @staticmethod
     def deserialize_get_bulk(keys):
@@ -126,6 +146,9 @@ class CacheTools:
     #
     @staticmethod
     def delete(key):
+        if key is None:
+            raise TypeError('Cache key cannot be None')
+
         uwsgi.cache_del(key)
     
 
