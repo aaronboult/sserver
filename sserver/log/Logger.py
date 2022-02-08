@@ -21,27 +21,44 @@ class Logger:
 
 
     #
-    # Log
-    # @param str text The test to log
+    # Info
+    # @param str text The text to log
     # @param dict context (optional) Context to go along with text
     #
-    @classmethod
-    def log(cls, text, context = __Empty__):
-        
-        sys.stdout.write(cls.format(text))
+    @staticmethod
+    def info(text, context = __Empty__):
+
+        if not isinstance(text, str):
+            raise TypeError(f'text must be of type str, got {type(text)}')
+
+        sys.stdout.write(text)
 
         if context != __Empty__:
-            sys.stdout.write(cls.delimiter + cls.format(context))
+            sys.stdout.write(Logger.delimiter + Logger.format(context))
 
         sys.stdout.write('\n')
+
+
+    #
+    # Log
+    # @param str text The text to log
+    # @param dict context (optional) Context to go along with text
+    #
+    @staticmethod
+    def log(text, context = __Empty__):
+
+        Logger.info(Logger.format(text), context)
     
 
     #
     # Label
     # @param str text The text to label
     #
-    @classmethod
-    def label(cls, text, context = __Empty__):
+    @staticmethod
+    def label(text, context = __Empty__):
+
+        if not isinstance(text, str):
+            raise TypeError(f'text must be of type str, got {type(text)}')
 
         length = len(text)
 
@@ -52,25 +69,28 @@ class Logger:
         sys.stdout.write(text)
 
         if context != __Empty__:
-            sys.stdout.write(cls.format(context))
+            sys.stdout.write(Logger.format(context))
     
 
     #
     # Exception
     # @param Error error The error to log
     #
-    @classmethod
-    def exception(cls, error):
-        cls.label(f'Exception')
-        cls.log(str(error))
-        cls.linebreak()
+    @staticmethod
+    def exception(error):
+        if not isinstance(error, Exception):
+            raise TypeError(f'error must be of type Exception, got {type(error)}')
+
+        Logger.label(f'Exception')
+        Logger.log(str(error))
+        Logger.linebreak()
     
 
     #
     # Linebreak
     #
-    @classmethod
-    def linebreak(cls, count = 1):
+    @staticmethod
+    def linebreak(count = 1):
         sys.stdout.write('\n' * count)
 
 
@@ -80,22 +100,22 @@ class Logger:
     # @param **kwargs Options for processing
     # @returns str The formatted content
     #
-    @classmethod
-    def format(cls, content, **kwargs):
+    @staticmethod
+    def format(content, **kwargs):
 
         text = None
 
         if type(content) == dict:
-            return cls.format_dict(content, **kwargs)
+            return Logger.format_dict(content, **kwargs)
 
         if type(content) == list:
-            return cls.format_list(content, **kwargs)
+            return Logger.format_list(content, **kwargs)
         
         if type(content) == tuple:
-            return cls.format_tuple(content, **kwargs)
+            return Logger.format_tuple(content, **kwargs)
         
         if type(content) == set:
-            return cls.format_set(content, **kwargs)
+            return Logger.format_set(content, **kwargs)
         
         if type(content) == str:
             text = f'"{str(content)}"'
@@ -112,8 +132,10 @@ class Logger:
     # @param **kwargs Options for processing
     # @returns str The formatted dictionary
     #
-    @classmethod
-    def format_dict(cls, dct, **kwargs):
+    @staticmethod
+    def format_dict(dct, **kwargs):
+        if not isinstance(dct, dict):
+            raise TypeError(f'dct must be of type dict, got {type(dct)}')
 
         # Update indent level for tabbing
         indent_level = kwargs.get('indent_level', 0)
@@ -124,7 +146,7 @@ class Logger:
             kwargs['indent_level'] = indent_level + 1
             current_indent = '\t' * (indent_level + 1)
 
-            text += f'{current_indent}"{key}"{cls.delimiter}{cls.format(value, **kwargs)},\n'
+            text += f'{current_indent}"{key}"{Logger.delimiter}{Logger.format(value, **kwargs)},\n'
 
         if text == '{\n':
             text = '\t' * (indent_level - 1) + '{}'
@@ -141,11 +163,14 @@ class Logger:
     # @param **kwargs Options for processing
     # @returns str The formatted list
     #
-    @classmethod
-    def format_list(cls, lst, **kwargs):
+    @staticmethod
+    def format_list(lst, **kwargs):
+        if not isinstance(lst, list):
+            raise TypeError(f'lst must be of type list, got {type(lst)}')
+
         kwargs['wrappers'] = ('[', ']')
 
-        return cls.format_iterable(lst, **kwargs) 
+        return Logger.format_iterable(lst, **kwargs) 
     
 
 
@@ -155,11 +180,14 @@ class Logger:
     # @param **kwargs Options for processing
     # @returns str The formatted tuple
     #
-    @classmethod
-    def format_tuple(cls, tpl, **kwargs):
+    @staticmethod
+    def format_tuple(tpl, **kwargs):
+        if not isinstance(tpl, tuple):
+            raise TypeError(f'tpl must be of type tuple, got {type(tpl)}')
+
         kwargs['wrappers'] = ('(', ')')
 
-        return cls.format_iterable(tpl, **kwargs)
+        return Logger.format_iterable(tpl, **kwargs)
     
 
     #
@@ -168,11 +196,14 @@ class Logger:
     # @param **kwargs Options for processing
     # @returns str The formatted set
     #
-    @classmethod
-    def format_set(cls, st, **kwargs):
+    @staticmethod
+    def format_set(st, **kwargs):
+        if not isinstance(st, set):
+            raise TypeError(f's must be of type set, got {type(st)}')
+
         kwargs['wrappers'] = ('{', '}')
 
-        return cls.format_iterable(tuple(st), **kwargs)
+        return Logger.format_iterable(tuple(st), **kwargs)
     
 
 
@@ -182,8 +213,9 @@ class Logger:
     # @param **kwargs Options for processing
     # @returns str The formatted iterable
     #
-    @classmethod
-    def format_iterable(cls, itr, **kwargs):
+    @staticmethod
+    def format_iterable(itr, **kwargs):
+
         use_multiline = kwargs.get('use_multiline', True)
 
         # Expects a tuple e.g. ("[", "]")
@@ -204,7 +236,7 @@ class Logger:
                 kwargs['indent_level'] = indent_level + 1
                 text += '\n' + '\t' * (indent_level + 1)
 
-            text += f'{cls.format(itr[i], **kwargs)}{trail}'
+            text += f'{Logger.format(itr[i], **kwargs)}{trail}'
 
         if use_multiline:
             text += '\n' + '\t' * (indent_level)
