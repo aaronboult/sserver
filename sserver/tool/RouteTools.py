@@ -13,7 +13,7 @@ class RouteTools:
     #
     @staticmethod
     def clear():
-        Logger.log('Clearing routes')
+        Logger.info('Clearing routes')
         route_manifest = CacheTools.pop('route_manifest', default = [])
         CacheTools.delete_bulk(route_manifest)
 
@@ -32,7 +32,7 @@ class RouteTools:
 
         route_manifest = []
 
-        Logger.log('Loading Routes...')
+        Logger.info('Loading Routes...')
         for module in route_module_list:
             route_list = ModuleTools.get_from_module(module, 'routes', [])
 

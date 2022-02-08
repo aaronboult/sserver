@@ -14,7 +14,7 @@ class ConfigTools:
     #
     @staticmethod
     def clear():
-        Logger.log('Clearing config')
+        Logger.info('Clearing config')
         CacheTools.delete('config')
     
 
@@ -26,7 +26,7 @@ class ConfigTools:
 
         ConfigTools.clear()
 
-        Logger.log('Loading config...')
+        Logger.info('Loading config...')
 
         config = {}
         config_package_manifest = []
@@ -35,7 +35,7 @@ class ConfigTools:
         config_filename = kwargs.get('filename')
         if config_filename == None:
             config_filename = 'config.py'
-            Logger.log('No filename found in kwargs, defaulting to config.py')
+            Logger.info('No filename found in kwargs, defaulting to config.py')
 
         if not isinstance(config_filename, str):
             raise TypeError('config_filename must be of type str')
@@ -43,7 +43,7 @@ class ConfigTools:
         include_sserver_config = kwargs.get('include_sserver_config')
         if include_sserver_config is None:
             include_sserver_config = True
-            Logger.log('No include_sserver_config found in kwargs, defaulting to True')
+            Logger.info('No include_sserver_config found in kwargs, defaulting to True')
 
         if not isinstance(include_sserver_config, bool):
             raise TypeError('include_sserver_config must be of type bool')
@@ -68,7 +68,7 @@ class ConfigTools:
 
             config_package_manifest.append(package)
 
-        Logger.log('Configs', config)
+        Logger.info('Configs', config)
 
         CacheTools.serialize_set_bulk({
             'config' : config,
