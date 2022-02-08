@@ -1,3 +1,4 @@
+from subprocess import call
 from sserver.log.Logger import Logger
 from sserver.mixin.OptionMixin import OptionMixin
 from sserver.tool.CacheTools import CacheTools
@@ -164,9 +165,7 @@ def application(environment, start_response):
 #
 # Initialize Server
 #
-def initialize():
+def initialize(**kwargs):
     CacheTools.clear()
-    ConfigTools.load()
+    ConfigTools.load(**kwargs.get('config', {}))
     RouteTools.load()
-
-initialize()
