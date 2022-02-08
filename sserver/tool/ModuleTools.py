@@ -92,5 +92,33 @@ class ModuleTools:
     # @returns dict The dictionary of values in the module
     #
     @staticmethod
-    def get_all_from_module(module):
-        return module.__dict__
+    def get_all_from_module(module, include_builtins = False, **kwargs):
+
+        force_include_keys = kwargs.get('force_include_keys', [])
+
+        if not isinstance(force_include_keys, list):
+            raise TypeError('force_include_keys must be of type list')
+
+        # Use this method over startswith(__) to allow custom module values with __
+        builtin_keys = [
+            '__builtins__',
+            '__cached__',
+            '__doc__',
+            '__file__',
+            '__loader__',
+            '__name__',
+            '__package__',
+            '__spec__',
+        ]
+
+        attributes = {}
+
+        for key, value in module.__dict__.items():
+            if include_builtins is True or key in force_include_keys:
+                attributes[key] = value
+
+            else:
+                if key not in builtin_keys:
+                    attributes[key] = value
+
+        return attributes
