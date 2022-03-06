@@ -1,4 +1,6 @@
 from sserver.endpoint.BaseEndpoint import BaseEndpoint
+from sserver.tool.ModuleTools import ModuleTools
+from sserver.log.Logger import Logger
 
 
 #
@@ -10,7 +12,12 @@ class IndexEndpoint(BaseEndpoint):
     # Get
     #
     def get(self):
-        return 'get'
+
+        config = self.get_config()
+
+        Logger.log('Config', config)
+
+        return config.get('TEST_VAR')
 
     #
     # Post
