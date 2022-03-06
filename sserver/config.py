@@ -1,5 +1,5 @@
 #
-# Config File For Apps
+# Config File For SServer
 #
 
-APP_FOLDER = 'apps'
+APP_NAME_REGEX = '^([A-Za-z_]*)\.([A-Za-z_]*)\.([A-Za-z_]*)'
