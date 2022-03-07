@@ -28,8 +28,6 @@ class Server(OptionMixin):
 
             # Get status and ensure it is bytes
             status = response.get('status', '200 OK')
-            # if not isinstance(status, bytes):
-            #     status = status.encode('utf-8')
 
             # Get content and ensure it is bytes
             content = response.get('body', '')
@@ -37,7 +35,7 @@ class Server(OptionMixin):
                 content = str(content).encode('utf-8')
 
         except Exception as e:
-            Logger.log('Error building response', e)
+            Logger.exception(e)
 
             # @note Ensure a response for unexplained errors
             headers = [('Content-Type', 'text/html')]
