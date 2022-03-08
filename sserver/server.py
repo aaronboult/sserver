@@ -81,6 +81,9 @@ class Server(OptionMixin):
 
         uri = environment.get('REQUEST_URI')
 
+        if uri[-1] == '/':
+            uri = uri[:-1]
+
         route = CacheTools.deserialize_get(uri)
 
         return route
