@@ -103,10 +103,10 @@ class ConfigTools:
 
         if not isinstance(key, str):
             raise TypeError('key must be of type str')
-        
+
         config = CacheTools.deserialize_get(cls.config_cache_key)
 
-        return config.get(key)
+        return config.get('sserver').get(key)
     
 
     #
