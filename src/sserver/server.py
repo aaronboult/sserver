@@ -125,19 +125,19 @@ class Server(OptionMixin):
 
         if method == 'GET':
             content = route.endpoint().get()
-        
+
         elif method == 'POST':
             content = route.endpoint().post()
-        
+
         elif method == 'PUT':
             content = route.endpoint().put()
-        
+
         elif method == 'PATCH':
             content = route.endpoint().patch()
-        
+
         elif method == 'DELETE':
             content = route.endpoint().delete()
-        
+
         else:
             return self.handle_405()
 
