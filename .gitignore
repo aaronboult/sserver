@@ -1,9 +1,9 @@
 *.code-workspace
 *.pyc
-*.pyo
-
-__pycache__/
-
-build/
-dist/
-SServer.egg-info/
+.pytest_cache
+.vscode
+build
+dist
+__pycache__
+*.egg-info
+_build
