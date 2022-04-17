@@ -3,15 +3,27 @@ from sserver.log.Logger import Logger
 
 
 #
-# Index Endpoint
+# Test Endpoint
 #
-class IndexEndpoint(BaseEndpoint):
+class TestEndpoint(BaseEndpoint):
+
+
+    #
+    # Template
+    #
+    template = 'test.html'
+
 
     #
     # Get
     #
     def get(self):
-        return 'Get index'
+
+        config = self.get_config()
+
+        return super().get(**{
+            'TEST_VAR' : self.get_from_config('TEST_VAR'),
+        })
 
     #
     # Post

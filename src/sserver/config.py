@@ -1,5 +1,10 @@
 #
-# Config File For Apps
+# Config File For SServer
 #
 
-APP_FOLDER = 'apps'
+
+#
+# Apps
+#
+APP_NAME_REGEX = '^([A-Za-z_]*)\.([A-Za-z_]*)\.([A-Za-z_]*)'
+PREFIX_ROUTE_WITH_APP_NAME = True

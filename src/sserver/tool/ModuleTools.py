@@ -1,6 +1,7 @@
 from sserver.log.Logger import Logger
 from sserver.tool.PathTools import PathTools
 import importlib
+from re import match
 
 
 #
@@ -8,17 +9,24 @@ import importlib
 #
 class ModuleTools:
 
+
+    #
+    # App Name Regex
+    #
+    app_name_regex = None
+
+
     #
     # Load from filename
     # @param str filename The filename to import
     # @returns list The loaded module
     #
-    @staticmethod
-    def load_from_filename(filename, **kwargs):
+    @classmethod
+    def load_from_filename(cls, filename, **kwargs):
 
         modules = kwargs.get('default', [])
 
-        ModuleTools.load_from_filename_mutable(filename, modules, **kwargs)
+        cls.load_from_filename_mutable(filename, modules, **kwargs)
 
         return modules
     
@@ -28,8 +36,8 @@ class ModuleTools:
     # @param str filename The filename to import
     # @param list out The mutable list to append to
     #
-    @staticmethod
-    def load_from_filename_mutable(filename, out, **kwargs):
+    @classmethod
+    def load_from_filename_mutable(cls, filename, out, **kwargs):
         if not isinstance(out, list):
             raise TypeError('Parameter out must be of type list')
 
@@ -40,14 +48,14 @@ class ModuleTools:
 
         for path in path_list:
             import_string = path.replace('./', '').replace('.py', '').replace('/', '.')
-            out.append(ModuleTools.load_from_path(import_string, fromlist))
+            out.append(cls.load_from_path(import_string, fromlist))
 
         for path in force_load_path_list:
             if isinstance(path, str):
-                out.append(ModuleTools.load_from_path(path))
+                out.append(cls.load_from_path(path))
 
             elif isinstance(path, dict):
-                out.append(ModuleTools.load_from_path(
+                out.append(cls.load_from_path(
                     path.get('path'),
                     path.get('fromlist'),
                 ))
@@ -122,3 +130,22 @@ class ModuleTools:
                     attributes[key] = value
 
         return attributes
+    
+
+    #
+    # Get App Path From Path
+    #
+    @classmethod
+    def get_app_path_from_path(cls, package_name):
+
+        Logger.info('Getting app path from package', package_name)
+
+        if cls.app_name_regex == None:
+            raise TypeError('app_name_regex not set on ModuleTools')
+
+        match_obj = match(cls.app_name_regex, package_name)
+
+        if match_obj is None:
+            return None
+
+        return match_obj.group(0)

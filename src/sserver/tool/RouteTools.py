@@ -1,4 +1,5 @@
 from sserver.log.Logger import Logger
+from sserver.tool.ConfigTools import ConfigTools
 from sserver.tool.ModuleTools import ModuleTools
 from sserver.tool.CacheTools import CacheTools
 
@@ -13,7 +14,7 @@ class RouteTools:
     #
     @staticmethod
     def clear():
-        Logger.log('Clearing routes')
+        Logger.info('Clearing routes')
         route_manifest = CacheTools.pop('route_manifest', default = [])
         CacheTools.delete_bulk(route_manifest)
 
@@ -32,11 +33,32 @@ class RouteTools:
 
         route_manifest = []
 
-        Logger.log('Loading Routes...')
+        prefix_with_app_name = ConfigTools.fetch('PREFIX_ROUTE_WITH_APP_NAME')
+        if prefix_with_app_name == None:
+            prefix_with_app_name = False
+
+        elif not isinstance(prefix_with_app_name, bool):
+            raise TypeError(f'Config value for PREFIX_ROUTE_WITH_APP_NAME must be a boolean, got type {type(prefix_with_app_name)}')
+
+        Logger.info('Loading Routes...')
         for module in route_module_list:
             route_list = ModuleTools.get_from_module(module, 'routes', [])
 
             for route in route_list:
+
+                # Ensure routes are prefixed by a slash
+                if route.url[0] != '/':
+                    route.url = f'/{route.url}'
+                
+                # Ensure routes are not suffixed by a slash
+                if route.url[-1] == '/':
+                    route.url = route.url[:-1]
+
+                if prefix_with_app_name:
+                    # Get the apps folder name from the path and prepend to url
+                    app_name = ModuleTools.get_app_path_from_path(module.__package__).split('.')[-1]
+                    route.url = f'/{app_name}{route.url}'
+
                 Logger.log('Found Route {}, handled by {}'.format(route.url, str(route.endpoint)))
 
                 # Assign route and add to manifest

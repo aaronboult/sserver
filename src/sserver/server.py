@@ -1,4 +1,3 @@
-from subprocess import call
 from sserver.log.Logger import Logger
 from sserver.mixin.OptionMixin import OptionMixin
 from sserver.tool.CacheTools import CacheTools
@@ -29,19 +28,19 @@ class Server(OptionMixin):
 
             # Get status and ensure it is bytes
             status = response.get('status', '200 OK')
-            # if not isinstance(status, bytes):
-            #     status = status.encode('utf-8')
 
             # Get content and ensure it is bytes
             content = response.get('body', '')
             if not isinstance(content, bytes):
-                content = content.encode('utf-8')
-        
-        except:
+                content = str(content).encode('utf-8')
+
+        except Exception as e:
+            Logger.exception(e)
+
             # @note Ensure a response for unexplained errors
             headers = [('Content-Type', 'text/html')]
             status = '500 Internal Server Error'
-            content = '500 Internal Server Error'
+            content = b'500 Internal Server Error'
 
         # @note If this raises an error there is a serious problem; start_response is passed by uwsgi
         start_response = self.getOption('start_response')
@@ -81,6 +80,9 @@ class Server(OptionMixin):
         environment = self.getOption('environment')
 
         uri = environment.get('REQUEST_URI')
+
+        if uri[-1] == '/':
+            uri = uri[:-1]
 
         route = CacheTools.deserialize_get(uri)
 
@@ -140,8 +142,6 @@ class Server(OptionMixin):
 
         else:
             return self.handle_405()
-
-        Logger.log('content', content)
 
         return {
             'body' : content,

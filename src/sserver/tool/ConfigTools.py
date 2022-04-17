@@ -1,4 +1,3 @@
-from modulefinder import Module
 from sserver.log.Logger import Logger
 from sserver.tool.CacheTools import CacheTools
 from sserver.tool.ModuleTools import ModuleTools
@@ -10,53 +9,67 @@ class ConfigTools:
 
 
     #
+    # Config Cache Key
+    #
+    config_cache_key = 'sserver.config'
+
+
+    #
     # Load Config
     #
     @staticmethod
     def clear():
-        Logger.log('Clearing config')
+        Logger.info('Clearing config')
         CacheTools.delete('config')
     
 
     #
     # Load
     #
-    @staticmethod
-    def load(**kwargs):
+    @classmethod
+    def load(cls, **kwargs):
 
-        ConfigTools.clear()
+        cls.clear()
 
-        Logger.log('Loading config...')
+        Logger.info('Loading config...')
 
         config = {}
         config_package_manifest = []
 
 
+        # Get filename for config files
         config_filename = kwargs.get('filename')
         if config_filename == None:
             config_filename = 'config.py'
-            Logger.log('No filename found in kwargs, defaulting to config.py')
+            Logger.info('No filename found in kwargs, defaulting to config.py')
 
         if not isinstance(config_filename, str):
             raise TypeError('config_filename must be of type str')
 
-        include_sserver_config = kwargs.get('include_sserver_config')
-        if include_sserver_config is None:
-            include_sserver_config = True
-            Logger.log('No include_sserver_config found in kwargs, defaulting to True')
 
-        if not isinstance(include_sserver_config, bool):
-            raise TypeError('include_sserver_config must be of type bool')
+        # Get whether default config values should be used
+        include_sserver_default_config = kwargs.get('include_sserver_default_config')
+        if include_sserver_default_config is None:
+            include_sserver_default_config = True
+            Logger.info('No include_sserver_default_config found in kwargs, defaulting to True')
+
+        if not isinstance(include_sserver_default_config, bool):
+            raise TypeError('include_sserver_default_config must be of type bool')
 
 
-        sserver_config = {}
-        if include_sserver_config:
-            sserver_config = ModuleTools.get_all_from_module(
-                ModuleTools.load_from_path('sserver.config'),
+        # Load the default config values
+        sserver_default_config = {}
+        if include_sserver_default_config:
+            sserver_default_config = ModuleTools.get_all_from_module(
+                ModuleTools.load_from_path('sserver.default_config'),
             )
 
 
         config_module_list = ModuleTools.load_from_filename(config_filename)
+
+        config_module_list.append(
+            ModuleTools.load_from_path(cls.config_cache_key)
+        )
 
         for config_module in config_module_list:
             current_config = ModuleTools.get_all_from_module(config_module, **{
@@ -64,13 +77,76 @@ class ConfigTools:
             })
 
             package = current_config.pop('__package__')
-            config[package] = {**sserver_config, **current_config}
+            config[package] = {**sserver_default_config, **current_config}
 
             config_package_manifest.append(package)
 
-        Logger.log('Configs', config)
-
         CacheTools.serialize_set_bulk({
-            'config' : config,
-            'config_package_manifest' : config_package_manifest
+            cls.config_cache_key : config,
+            f'{cls.config_cache_key}_package_manifest' : config_package_manifest
         })
+
+        Logger.info('Configs', config)
+
+
+        # Assign the app name regex to ModuleTools
+        ModuleTools.app_name_regex = cls.fetch_from_app('sserver', 'APP_NAME_REGEX')
+    
+
+    #
+    # Fetch
+    # @param str key The key to fetch from the server config
+    # @returns mixed The value of the key
+    #
+    @classmethod
+    def fetch(cls, key):
+
+        if not isinstance(key, str):
+            raise TypeError('key must be of type str')
+
+        config = CacheTools.deserialize_get(cls.config_cache_key)
+
+        return config.get('sserver').get(key)
+    
+
+    #
+    # Fetch App
+    # @param str app_name The name of the app to fetch from
+    # @returns dict The apps config
+    #
+    @classmethod
+    def fetch_app(cls, app_name):
+
+        Logger.info('Fetching app with name', app_name)
+            
+        if not isinstance(app_name, str):
+            raise TypeError('app_name must be of type str')
+        
+        config = CacheTools.deserialize_get(cls.config_cache_key)
+
+        if app_name in config:
+            return config.get(app_name)
+
+        else:
+            raise TypeError(f'No app config with app name: {app_name}')
+
+
+    #
+    # Fetch From App
+    # @param str app_name The name of the app to fetch from
+    # @param str key The key to fetch from the app
+    # @returns mixed The value of the key
+    #
+    @classmethod
+    def fetch_from_app(cls, app_name, key):
+        
+        if not isinstance(key, str):
+            raise TypeError('key must be of type str')
+        
+        config = cls.fetch_app(app_name)
+
+        if key in config:
+            return config.get(key)
+
+        else:
+            raise TypeError(f'Config with app name {app_name} does not contain key value pairs for key {key}')

@@ -13,7 +13,7 @@ class CacheTools:
     #
     @staticmethod
     def clear():
-        Logger.log('Clearing cache')
+        Logger.info('Clearing cache')
         uwsgi.cache_clear()
     
 
