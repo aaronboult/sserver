@@ -1,5 +1,4 @@
-.. |Tests| image:: https://github.com/aaronboult/sserver/actions/workflows/tests.yml/badge.svg
-   :target:
+.. image:: https://github.com/aaronboult/sserver/actions/workflows/tests.yml/badge.svg
 =======
 SServer
 =======
