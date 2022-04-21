@@ -1,9 +1,11 @@
 *.code-workspace
+*.egg-info
 *.pyc
+.tox
 .pytest_cache
 .vscode
+venv
 build
 dist
-__pycache__
-*.egg-info
 _build
+__pycache__
