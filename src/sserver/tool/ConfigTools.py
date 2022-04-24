@@ -1,6 +1,11 @@
+import configparser
+import os
+import sys
+from sserver.config import PROJECT_DEFAULT_CONFIG, APP_DEFAULT_CONFIG
 from sserver.log.Logger import Logger
 from sserver.tool.CacheTools import CacheTools
 from sserver.tool.ModuleTools import ModuleTools
+from sserver.tool.PathTools import PathTools
 
 #
 # Config Tools
@@ -34,62 +39,93 @@ class ConfigTools:
 
         Logger.info('Loading config...')
 
+
         config = {}
         config_package_manifest = []
 
 
         # Get filename for config files
-        config_filename = kwargs.get('filename')
-        if config_filename == None:
-            config_filename = 'config.py'
+        CONFIG_FILENAME = kwargs.get('filename')
+        if CONFIG_FILENAME == None:
+            CONFIG_FILENAME = 'config.ini'
             Logger.info('No filename found in kwargs, defaulting to config.py')
 
-        if not isinstance(config_filename, str):
+        if not isinstance(CONFIG_FILENAME, str):
             raise TypeError('config_filename must be of type str')
 
 
         # Get whether default config values should be used
-        include_sserver_default_config = kwargs.get('include_sserver_default_config')
-        if include_sserver_default_config is None:
-            include_sserver_default_config = True
+        INCLUDE_DEFAULT_CONFIG = kwargs.get('include_sserver_default_config')
+        if INCLUDE_DEFAULT_CONFIG is None:
+            INCLUDE_DEFAULT_CONFIG = True
             Logger.info('No include_sserver_default_config found in kwargs, defaulting to True')
 
-        if not isinstance(include_sserver_default_config, bool):
+        if not isinstance(INCLUDE_DEFAULT_CONFIG, bool):
             raise TypeError('include_sserver_default_config must be of type bool')
 
 
-        # Load the default config values
-        sserver_default_config = {}
-        if include_sserver_default_config:
-            sserver_default_config = ModuleTools.get_all_from_module(
-                ModuleTools.load_module('sserver.default_config', package = __file__),
-            )
+        # Get project config
+        config_parser = configparser.ConfigParser()
+
+        # Load project config file
+        PROJECT_CONFIG_PATH = os.path.join(sys.path[0], CONFIG_FILENAME)
+        config_parser.read(PROJECT_CONFIG_PATH)
+
+        # Load project config
+        PROJECT_CONFIG = {}
+
+        if INCLUDE_DEFAULT_CONFIG:
+            PROJECT_CONFIG = PROJECT_DEFAULT_CONFIG
+
+        if 'project' in config_parser:
+            PROJECT_CONFIG = {
+                **PROJECT_CONFIG,
+                **dict(config_parser['project'])
+            }
 
 
-        # Create list of modules to load configs from and add sserver cache to it
-        # @todo Refactor to use APP_FOLDER config value
-        config_module_list = ModuleTools.load_from_filename(config_filename, folder_list = ['apps'])
-        config_module_list.append(
-            ModuleTools.load_module(cls.config_cache_key, package = __file__)
+        # Get paths to app configs
+        APP_FOLDER = PROJECT_CONFIG.get('APP_FOLDER')
+
+        # Get list of config files in app folder
+        APP_DIRECTORY_PATH = os.path.join(sys.path[0], APP_FOLDER)
+        APP_DIRECTORY_LIST = PathTools.get_directory_list(
+            APP_DIRECTORY_PATH
         )
 
-        for config_module in config_module_list:
-            current_config = ModuleTools.get_all_from_module(config_module, **{
-                'force_include_keys' : ['__package__']
-            })
+        # Load configs from each app
+        for APP in APP_DIRECTORY_LIST:
+            if APP != '__pycache__':
+                APP_CONFIG_PATH = os.path.join(APP_DIRECTORY_PATH, APP, CONFIG_FILENAME)
 
-            package = current_config.pop('__package__')
-            config[package] = {**sserver_default_config, **current_config}
+                # Get app config
+                config_parser.read(APP_CONFIG_PATH)
 
-            config_package_manifest.append(package)
+                config[APP] = {}
+
+                # Load app config
+                config[APP] = {}
+
+                if INCLUDE_DEFAULT_CONFIG:
+                    config[APP] = APP_DEFAULT_CONFIG
+
+                for section in config_parser.sections():
+                    config[APP][section] = dict(config_parser[section])
+
+                # Add app to package manifest
+                config_package_manifest.append(APP)
 
 
+        Logger.log('Project Config', PROJECT_CONFIG)
         Logger.info('Configs', config)
+        Logger.info('Package Manifest', config_package_manifest)
 
         # Initialize cache before accessing
-        # CacheTools.initialize(**{
-
-        # })
+        CacheTools.initialize(**{
+            'host' : PROJECT_CONFIG.get('CACHE_HOST'),
+            'port' : PROJECT_CONFIG.get('CACHE_PORT'),
+            'decode_strings' : PROJECT_CONFIG.get('CACHE_DECODE_STRINGS'),
+        })
 
         CacheTools.set_bulk({
             cls.config_cache_key : config,
