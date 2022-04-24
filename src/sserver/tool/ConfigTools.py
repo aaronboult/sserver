@@ -29,7 +29,8 @@ class ConfigTools:
     @classmethod
     def load(cls, **kwargs):
 
-        cls.clear()
+        if CacheTools.is_ready():
+            cls.clear()
 
         Logger.info('Loading config...')
 
@@ -61,14 +62,15 @@ class ConfigTools:
         sserver_default_config = {}
         if include_sserver_default_config:
             sserver_default_config = ModuleTools.get_all_from_module(
-                ModuleTools.load_from_path('sserver.default_config'),
+                ModuleTools.load_module('sserver.default_config', package = __file__),
             )
 
 
-        config_module_list = ModuleTools.load_from_filename(config_filename)
-
+        # Create list of modules to load configs from and add sserver cache to it
+        # @todo Refactor to use APP_FOLDER config value
+        config_module_list = ModuleTools.load_from_filename(config_filename, folder_list = ['apps'])
         config_module_list.append(
-            ModuleTools.load_from_path(cls.config_cache_key)
+            ModuleTools.load_module(cls.config_cache_key, package = __file__)
         )
 
         for config_module in config_module_list:
@@ -81,12 +83,18 @@ class ConfigTools:
 
             config_package_manifest.append(package)
 
-        CacheTools.serialize_set_bulk({
+
+        Logger.info('Configs', config)
+
+        # Initialize cache before accessing
+        # CacheTools.initialize(**{
+
+        # })
+
+        CacheTools.set_bulk({
             cls.config_cache_key : config,
             f'{cls.config_cache_key}_package_manifest' : config_package_manifest
         })
-
-        Logger.info('Configs', config)
 
 
         # Assign the app name regex to ModuleTools
