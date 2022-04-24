@@ -42,7 +42,6 @@ class Server(OptionMixin):
             status = '500 Internal Server Error'
             content = b'500 Internal Server Error'
 
-        # @note If this raises an error there is a serious problem; start_response is passed by uwsgi
         start_response = self.getOption('start_response')
         start_response(status, headers)
 
@@ -166,6 +165,5 @@ def application(environment, start_response):
 # Initialize Server
 #
 def initialize(**kwargs):
-    CacheTools.clear()
     ConfigTools.load(**kwargs.get('config', {}))
     RouteTools.load()
