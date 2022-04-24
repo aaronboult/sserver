@@ -25,6 +25,16 @@ class PathTools:
 
 
     #
+    # Get Directory List
+    # @param str path The path to get the directory list from
+    # @returns list The directory list
+    #
+    @staticmethod
+    def get_directory_list(directory):
+        return next(walk(directory))[1]
+
+
+    #
     # Get Path List To File
     # @param str filename The name of the file to search for
     # @returns list The list of paths to files of the given name
