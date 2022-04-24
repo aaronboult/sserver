@@ -1,3 +1,4 @@
+import sys
 from sserver.log.Logger import Logger
 from sserver.tool.PathTools import PathTools
 import importlib
@@ -17,62 +18,40 @@ class ModuleTools:
 
 
     #
-    # Load from filename
+    # Load From Filename
     # @param str filename The filename to import
     # @returns list The loaded module
     #
     @classmethod
-    def load_from_filename(cls, filename, **kwargs):
+    def load_from_filename(cls, filename, modules = None, package = None, folder_list = None):
 
-        modules = kwargs.get('default', [])
+        Logger.log('loading from filename', filename)
+        Logger.log('package', package)
 
-        cls.load_from_filename_mutable(filename, modules, **kwargs)
+        if modules is None:
+            modules = []
 
-        return modules
-    
-
-    #
-    # Load from filename mutable
-    # @param str filename The filename to import
-    # @param list out The mutable list to append to
-    #
-    @classmethod
-    def load_from_filename_mutable(cls, filename, out, **kwargs):
-        if not isinstance(out, list):
-            raise TypeError('Parameter out must be of type list')
-
-        fromlist = kwargs.get('fromlist', [])
-        force_load_path_list = kwargs.get('force_load_path_list', [])
-
-        path_list = PathTools.get_path_list_to_file(filename)
+        path_list = PathTools.get_path_list_to_file(filename, folder_list = folder_list)
 
         for path in path_list:
             import_string = path.replace('./', '').replace('.py', '').replace('/', '.')
-            out.append(cls.load_from_path(import_string, fromlist))
+            modules.append(cls.load_module(import_string, package = package))
 
-        for path in force_load_path_list:
-            if isinstance(path, str):
-                out.append(cls.load_from_path(path))
+        return modules
 
-            elif isinstance(path, dict):
-                out.append(cls.load_from_path(
-                    path.get('path'),
-                    path.get('fromlist'),
-                ))
-
-            else:
-                raise TypeError('Paths provided in force_load_path_list must be of type str or dict')
-    
 
     #
-    # Load Module From Path
+    # Load Module
     # @param str path The path to load from
     # @returns module The loaded module
     #
-    @staticmethod
-    def load_from_path(path, fromlist = []):
+    @classmethod
+    def load_module(cls, path, package = None):
+        if package == None:
+            package = sys.path[0]
+
         try:
-            return importlib.import_module(path)
+            return importlib.import_module(path, package)
 
         except:
             raise ModuleNotFoundError(f'No module found with path: {path}')
@@ -137,8 +116,6 @@ class ModuleTools:
     #
     @classmethod
     def get_app_path_from_path(cls, package_name):
-
-        Logger.info('Getting app path from package', package_name)
 
         if cls.app_name_regex == None:
             raise TypeError('app_name_regex not set on ModuleTools')
