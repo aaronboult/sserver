@@ -35,7 +35,7 @@ class Server(OptionMixin):
                 content = str(content).encode('utf-8')
 
         except Exception as e:
-            Logger.exception(e)
+            Logger.exception(e, reraise = False)
 
             # @note Ensure a response for unexplained errors
             headers = [('Content-Type', 'text/html')]
@@ -80,10 +80,7 @@ class Server(OptionMixin):
 
         uri = environment.get('REQUEST_URI')
 
-        if uri[-1] == '/':
-            uri = uri[:-1]
-
-        route = CacheTools.deserialize_get(uri)
+        route = CacheTools.get(uri)
 
         return route
 

@@ -77,13 +77,16 @@ class Logger:
     # @param Error error The error to log
     #
     @staticmethod
-    def exception(error):
+    def exception(error, reraise = False):
         if not isinstance(error, Exception):
             raise TypeError(f'error must be of type Exception, got {type(error)}')
 
         Logger.label(f'Exception')
         Logger.log(str(error))
         Logger.linebreak()
+
+        if reraise:
+            raise error
     
 
     #
