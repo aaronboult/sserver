@@ -1,3 +1,4 @@
+import pickle
 from sserver.log.Logger import Logger
 from sserver.tool.exception import (
     CacheNotInitializedException,
@@ -106,7 +107,7 @@ class CacheTools:
 
         value = cls.get_cache_instance().get(key)
 
-        return default if value is None else value
+        return default if value is None else cls.deserialize(value)
 
 
     #
@@ -120,7 +121,7 @@ class CacheTools:
         if key is None:
             raise TypeError(f'Cache key cannot be None, value : {str(value)}')
 
-        cls.get_cache_instance().set(key, value)
+        cls.get_cache_instance().set(key, cls.serialize(value))
 
 
     #
@@ -131,7 +132,10 @@ class CacheTools:
     @classmethod
     @requires_lock
     def get_bulk(cls, *keys):
-        return cls.get_cache_instance().mget(keys)
+        values = cls.get_cache_instance().mget(keys)
+
+        # Return the deserialized values
+        return list(map(cls.deserialize, values))
 
 
     #
@@ -141,7 +145,28 @@ class CacheTools:
     @classmethod
     @requires_lock
     def set_bulk(cls, values):
+        for key in values:
+            values[key] = cls.serialize(values[key])
+
         cls.get_cache_instance().mset(values)
+
+
+    #
+    # Serialize
+    # @param mixed value The value to serialize
+    #
+    @staticmethod
+    def serialize(value):
+        return pickle.dumps(value)
+
+
+    #
+    # Deserialize
+    # @param bytes value The value to deserialize
+    #
+    @staticmethod
+    def deserialize(cls, value):
+        return pickle.loads(value)
 
 
     #
