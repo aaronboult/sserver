@@ -41,15 +41,15 @@ class CacheTools:
     # Initialize
     #
     @classmethod
-    def initialize(cls, **kwargs):
+    def initialize(cls, host, port, decode_responses = True, db = 0):
         if cls.is_ready():
             raise CacheAlreadyInitializedException('Cache already initialized')
 
         cls.__cache_instance = redis.Redis(
-            host=kwargs.get('host'),
-            port=kwargs.get('port'),
-            db=kwargs.get('db', 0),
-            decode_responses=kwargs.get('decode_responses'),
+            host = host,
+            port = port,
+            db = db,
+            decode_responses = decode_responses,
         )
 
 

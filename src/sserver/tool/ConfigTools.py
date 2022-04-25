@@ -119,16 +119,15 @@ class ConfigTools:
                 config_package_manifest.append(APP)
 
 
-        Logger.log('Project Config', PROJECT_CONFIG)
-        Logger.info('Configs', config)
-        Logger.info('Package Manifest', config_package_manifest)
+        Logger.info('Loaded Configs', config)
+        Logger.info('Loaded Package Manifest', config_package_manifest)
 
         # Initialize cache before accessing
-        CacheTools.initialize(**{
-            'host' : PROJECT_CONFIG.get('CACHE_HOST'),
-            'port' : PROJECT_CONFIG.get('CACHE_PORT'),
-            'decode_strings' : PROJECT_CONFIG.get('CACHE_DECODE_STRINGS'),
-        })
+        CacheTools.initialize(
+            host = PROJECT_CONFIG.get('CACHE_HOST'),
+            port = PROJECT_CONFIG.get('CACHE_PORT'),
+            decode_strings = PROJECT_CONFIG.get('CACHE_DECODE_STRINGS'),
+        )
 
         CacheTools.set_bulk({
             CONFIG_CACHE_KEY : config,

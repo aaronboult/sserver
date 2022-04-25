@@ -46,8 +46,6 @@ class ModuleTools:
             package = sys.path[0]
 
         try:
-            Logger.log('importing module', path)
-            Logger.log('package', package)
             return importlib.import_module(path, package)
 
         except Exception as exception:
