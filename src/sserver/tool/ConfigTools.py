@@ -139,6 +139,7 @@ class ConfigTools:
     #
     # Fetch
     # @param str key The key to fetch from the project config
+    # @param str app_name The app to fetch from
     # @returns mixed The value of the key
     #
     @classmethod
@@ -156,6 +157,36 @@ class ConfigTools:
             return None
 
         return app_config.get(key)
+
+
+    #
+    # Nested Fetch
+    # @param str *key_list The list of keys in descending nested order to fetch
+    # @param str app_name The app to fetch from
+    # @returns mixed The value of the key
+    #
+    @classmethod
+    def nested_fetch(cls, *key_list, app_name = '__project__'):
+        value = None
+
+        if len(key_list) > 0:
+            # Fetch the first key in the tree
+            node = cls.fetch(key_list[0], app_name)
+
+            # Go down the tree fetching keys
+            tree_complete = True
+            key_list = key_list[1:]
+            for index, key in enumerate(key_list):
+                if not hasattr(node, '__getitem__'):
+                    tree_complete = False
+                    break
+
+                node = node[key]
+
+            if tree_complete:
+                value = node
+
+        return value
 
 
     #

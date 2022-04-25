@@ -79,5 +79,5 @@ class BaseEndpoint(OptionMixin):
     # @param string key The key to get from the config
     # @param mixed default The default value to return if the key is not found
     #
-    def get_from_config(self, key):
-        return ConfigTools.fetch(key, app_name = self.get_app_name())
+    def get_from_config(self, *key_list):
+        return ConfigTools.nested_fetch(*key_list, app_name = self.get_app_name())
