@@ -1,4 +1,5 @@
 from jinja2 import Environment, PackageLoader, select_autoescape
+from sserver.log.Logger import Logger
 from sserver.tool.ConfigTools import ConfigTools
 
 
@@ -17,15 +18,26 @@ class TemplateTools:
     @staticmethod
     def fetch(app_name, template_name):
 
-        templates_folder = ConfigTools.fetch_from_app(app_name, 'TEMPLATE_FOLDER')
+        APP_FOLDER = ConfigTools.fetch('APP_FOLDER')
+        TEMPLATE_FOLDER = ConfigTools.fetch('TEMPLATE_FOLDER', app_name = app_name)
+        TEMPLATE_FOLDER_PATH = f'{APP_FOLDER}.{app_name}'
 
-        environment = Environment(
-            loader=PackageLoader(app_name, templates_folder),
-            autoescape=select_autoescape()
-        )
+        Logger.log('app_name', app_name)
+        Logger.log('templates_folder', TEMPLATE_FOLDER)
 
-        return environment.get_template(template_name)
-    
+        try:
+            environment = Environment(
+                loader = PackageLoader(TEMPLATE_FOLDER_PATH, TEMPLATE_FOLDER),
+                autoescape = select_autoescape()
+            )
+
+            return environment.get_template(template_name)
+
+        except Exception as exception:
+            Logger.exception(exception)
+
+        return None
+
 
     #
     # Render
