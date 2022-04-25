@@ -41,7 +41,7 @@ class CacheTools:
     # Initialize
     #
     @classmethod
-    def initialize(cls, host, port, decode_responses = True, db = 0):
+    def initialize(cls, host, port, decode_strings = True, db = 0):
         if cls.is_ready():
             raise CacheAlreadyInitializedException('Cache already initialized')
 
@@ -49,7 +49,8 @@ class CacheTools:
             host = host,
             port = port,
             db = db,
-            decode_responses = decode_responses,
+            # @todo This causes errors
+            # decode_responses = decode_strings,
         )
 
 
@@ -96,12 +97,46 @@ class CacheTools:
 
     #
     # Get
-    # @param str key The key to get
+    # @param str|list key The key(s) to get
+    # @param mixed default The default value
     # @returns mixed The value of the key
     #
     @classmethod
     @requires_lock
-    def get(cls, key, default = None):
+    def get(cls, *key_list, default = None):
+        # If only one key supplies, wrap default to work with zip
+        if len(key_list) == 1 or not isinstance(default, list):
+            default = [default]
+
+        # Convert each key into a tuple to allow passing with *
+        key_list = list(map(lambda key: (key,), key_list))
+        Logger.log('key_list', key_list)
+        if isinstance(default, list):
+            KEY_LIST_LENGTH = len(key_list)
+            DEFAULT_LENGTH = len(default)
+
+            # Ensure default list is at least as long as key list
+            if KEY_LIST_LENGTH > DEFAULT_LENGTH:
+                default.extend(None for _ in range(KEY_LIST_LENGTH - DEFAULT_LENGTH))
+
+        # Generate a list of values using the key list
+        # Passes either just a key or key, default
+        value = [cls._get(*key_tuple) for key_tuple in key_list]
+
+        if len(value) == 1:
+            return value[0]
+
+        return value
+
+
+    #
+    # Get
+    # @param str key The key to get
+    # @param mixed default The default value
+    # @returns mixed The value of the key
+    #
+    @classmethod
+    def _get(cls, key, default = None):
         if key is None:
             raise TypeError('Cache key cannot be None')
 
@@ -117,41 +152,16 @@ class CacheTools:
     #
     @classmethod
     @requires_lock
-    def set(cls, key, value):
-        if key is None:
-            raise TypeError(f'Cache key cannot be None, value : {str(value)}')
+    def set(cls, key = None, value = None, key_value = None):
+        if isinstance(key_value, dict):
+            for key, value in key_value.items():
+                cls.set(key, value)
+            return
+
+        elif not isinstance(key, str):
+            raise TypeError(f'Cache key must be of type str, value : {str(value)}')
 
         cls.get_cache_instance().set(key, cls.serialize(value))
-
-
-    #
-    # Get Bulk
-    # @param list keys The keys to get
-    # @returns dict The keys and values
-    #
-    @classmethod
-    @requires_lock
-    def get_bulk(cls, *keys):
-        if len(keys) > 0:
-            return []
-
-        values = cls.get_cache_instance().mget(keys)
-
-        # Return the deserialized values
-        return list(map(cls.deserialize, values))
-
-
-    #
-    # Set Bulk
-    # @param dict values The keys and values to set
-    #
-    @classmethod
-    @requires_lock
-    def set_bulk(cls, values):
-        for key in values:
-            values[key] = cls.serialize(values[key])
-
-        cls.get_cache_instance().mset(values)
 
 
     #

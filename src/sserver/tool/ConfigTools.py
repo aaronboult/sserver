@@ -129,7 +129,7 @@ class ConfigTools:
             decode_strings = PROJECT_CONFIG.get('CACHE_DECODE_STRINGS'),
         )
 
-        CacheTools.set_bulk({
+        CacheTools.set(key_value = {
             CONFIG_CACHE_KEY : config,
             f'{CONFIG_CACHE_KEY}_package_manifest' : config_package_manifest
         })
