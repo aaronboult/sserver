@@ -132,6 +132,9 @@ class CacheTools:
     @classmethod
     @requires_lock
     def get_bulk(cls, *keys):
+        if len(keys) > 0:
+            return []
+
         values = cls.get_cache_instance().mget(keys)
 
         # Return the deserialized values
@@ -165,7 +168,7 @@ class CacheTools:
     # @param bytes value The value to deserialize
     #
     @staticmethod
-    def deserialize(cls, value):
+    def deserialize(value):
         return pickle.loads(value)
 
 
@@ -175,4 +178,5 @@ class CacheTools:
     #
     @classmethod
     def delete(cls, *keys):
-        cls.get_cache_instance().delete(*keys)
+        if len(keys) > 0:
+            cls.get_cache_instance().delete(*keys)
