@@ -63,7 +63,7 @@ class BaseEndpoint(OptionMixin):
     # @returns string The app name
     #
     def get_app_name(self):
-        return ModuleTools.get_app_path_from_path(self.__module__)
+        return ModuleTools.get_app_name(self.__module__)
 
 
     #
@@ -80,4 +80,4 @@ class BaseEndpoint(OptionMixin):
     # @param mixed default The default value to return if the key is not found
     #
     def get_from_config(self, key):
-        return ConfigTools.fetch_from_app(self.get_app_name(), key)
+        return ConfigTools.fetch(key, app_name = self.get_app_name())

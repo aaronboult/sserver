@@ -1,22 +1,20 @@
 import configparser
 import os
 import sys
-from sserver.config import PROJECT_DEFAULT_CONFIG, APP_DEFAULT_CONFIG
+from sserver.config import (
+    CONFIG_CACHE_KEY,
+    SSERVER_CONFIG,
+    PROJECT_DEFAULT_CONFIG,
+    APP_DEFAULT_CONFIG,
+)
 from sserver.log.Logger import Logger
 from sserver.tool.CacheTools import CacheTools
-from sserver.tool.ModuleTools import ModuleTools
 from sserver.tool.PathTools import PathTools
 
 #
 # Config Tools
 #
 class ConfigTools:
-
-
-    #
-    # Config Cache Key
-    #
-    config_cache_key = 'sserver.config'
 
 
     #
@@ -40,7 +38,9 @@ class ConfigTools:
         Logger.info('Loading config...')
 
 
-        config = {}
+        config = {
+            '__sserver__' : SSERVER_CONFIG,
+        }
         config_package_manifest = []
 
 
@@ -82,6 +82,9 @@ class ConfigTools:
                 **PROJECT_CONFIG,
                 **dict(config_parser['project'])
             }
+
+        # Add project config to config
+        config['__project__'] = PROJECT_CONFIG
 
 
         # Get paths to app configs
@@ -128,30 +131,32 @@ class ConfigTools:
         })
 
         CacheTools.set_bulk({
-            cls.config_cache_key : config,
-            f'{cls.config_cache_key}_package_manifest' : config_package_manifest
+            CONFIG_CACHE_KEY : config,
+            f'{CONFIG_CACHE_KEY}_package_manifest' : config_package_manifest
         })
-
-
-        # Assign the app name regex to ModuleTools
-        ModuleTools.app_name_regex = cls.fetch_from_app('sserver', 'APP_NAME_REGEX')
     
 
     #
     # Fetch
-    # @param str key The key to fetch from the server config
+    # @param str key The key to fetch from the project config
     # @returns mixed The value of the key
     #
     @classmethod
-    def fetch(cls, key):
+    def fetch(cls, key, app_name = '__project__'):
+
+        Logger.log('fetching', key)
+        Logger.log('with app_name', app_name)
 
         if not isinstance(key, str):
             raise TypeError('key must be of type str')
 
-        config = CacheTools.deserialize_get(cls.config_cache_key)
+        app_config = cls.fetch_app(app_name)
 
-        return config.get('sserver').get(key)
-    
+        if app_config is None:
+            return None
+
+        return app_config.get(key)
+
 
     #
     # Fetch App
@@ -162,35 +167,8 @@ class ConfigTools:
     def fetch_app(cls, app_name):
 
         Logger.info('Fetching app with name', app_name)
-            
+
         if not isinstance(app_name, str):
             raise TypeError('app_name must be of type str')
-        
-        config = CacheTools.deserialize_get(cls.config_cache_key)
 
-        if app_name in config:
-            return config.get(app_name)
-
-        else:
-            raise TypeError(f'No app config with app name: {app_name}')
-
-
-    #
-    # Fetch From App
-    # @param str app_name The name of the app to fetch from
-    # @param str key The key to fetch from the app
-    # @returns mixed The value of the key
-    #
-    @classmethod
-    def fetch_from_app(cls, app_name, key):
-        
-        if not isinstance(key, str):
-            raise TypeError('key must be of type str')
-        
-        config = cls.fetch_app(app_name)
-
-        if key in config:
-            return config.get(key)
-
-        else:
-            raise TypeError(f'Config with app name {app_name} does not contain key value pairs for key {key}')
+        return CacheTools.get(CONFIG_CACHE_KEY).get(app_name)

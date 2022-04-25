@@ -49,21 +49,17 @@ class RouteTools:
                 # Ensure routes are prefixed by a slash
                 if route.url[0] != '/':
                     route.url = f'/{route.url}'
-                
-                # Ensure routes are not suffixed by a slash
-                if route.url[-1] == '/':
-                    route.url = route.url[:-1]
 
                 if prefix_with_app_name:
                     # Get the apps folder name from the path and prepend to url
-                    app_name = ModuleTools.get_app_path_from_path(module.__package__).split('.')[-1]
+                    app_name = ModuleTools.get_app_name(module.__name__)
                     route.url = f'/{app_name}{route.url}'
 
                 Logger.log('Found Route {}, handled by {}'.format(route.url, str(route.endpoint)))
 
                 # Assign route and add to manifest
-                CacheTools.serialize_set(route.url, route)
+                CacheTools.set(route.url, route)
 
                 route_manifest.append(route.url)
 
-        CacheTools.serialize_set('route_manifest', route_manifest)
+        CacheTools.set('route_manifest', route_manifest)

@@ -1,5 +1,6 @@
 import sys
 from sserver.log.Logger import Logger
+from sserver.tool.ConfigTools import ConfigTools
 from sserver.tool.PathTools import PathTools
 import importlib
 from re import match
@@ -9,12 +10,6 @@ from re import match
 # Module Tools
 #
 class ModuleTools:
-
-
-    #
-    # App Name Regex
-    #
-    app_name_regex = None
 
 
     #
@@ -46,15 +41,18 @@ class ModuleTools:
     # @returns module The loaded module
     #
     @classmethod
-    def load_module(cls, path, package = None):
+    def load_module(cls, path, package = None, suppress_errors = True):
         if package == None:
             package = sys.path[0]
 
         try:
+            Logger.log('importing module', path)
+            Logger.log('package', package)
             return importlib.import_module(path, package)
 
-        except:
-            raise ModuleNotFoundError(f'No module found with path: {path}')
+        except Exception as exception:
+            if not suppress_errors:
+                raise exception
 
 
     #
@@ -109,20 +107,32 @@ class ModuleTools:
                     attributes[key] = value
 
         return attributes
-    
+
 
     #
-    # Get App Path From Path
+    # Get App Name
+    # @param str The modules name
+    # @returns str The app name
     #
     @classmethod
-    def get_app_path_from_path(cls, package_name):
+    def get_app_name(cls, module_name):
 
-        if cls.app_name_regex == None:
-            raise TypeError('app_name_regex not set on ModuleTools')
+        Logger.log('module_name', module_name)
 
-        match_obj = match(cls.app_name_regex, package_name)
+        # Get apps folder
+        app_folder = ConfigTools.fetch('APP_FOLDER')
 
-        if match_obj is None:
-            return None
+        if app_folder is None:
+            raise Exception('APP_FOLDER not set in config')
 
-        return match_obj.group(0)
+        if not isinstance(app_folder, str):
+            raise TypeError('APP_FOLDER must be of type str')
+
+        # Seperate module path
+        module_path = module_name.split('.')
+
+        # Get index of app folder
+        app_folder_index = module_path.index(app_folder)
+
+        # Return app name
+        return module_path[app_folder_index + 1]
