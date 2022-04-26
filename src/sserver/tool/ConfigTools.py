@@ -71,16 +71,18 @@ class ConfigTools:
         PROJECT_CONFIG_PATH = os.path.join(sys.path[0], CONFIG_FILENAME)
         config_parser.read(PROJECT_CONFIG_PATH)
 
+        evalutated_config = cls.get_evaluated_config_as_dict(config_parser)
+
         # Load project config
         PROJECT_CONFIG = {}
 
         if INCLUDE_DEFAULT_CONFIG:
             PROJECT_CONFIG = PROJECT_DEFAULT_CONFIG
 
-        if 'project' in config_parser:
+        if 'project' in evalutated_config:
             PROJECT_CONFIG = {
                 **PROJECT_CONFIG,
-                **dict(config_parser['project'])
+                **evalutated_config['project']
             }
 
         # Add project config to config
@@ -88,7 +90,7 @@ class ConfigTools:
 
 
         # Get paths to app configs
-        APP_FOLDER = PROJECT_CONFIG.get('APP_FOLDER')
+        APP_FOLDER = PROJECT_CONFIG.get('app_folder')
 
         # Get list of config files in app folder
         APP_DIRECTORY_PATH = os.path.join(sys.path[0], APP_FOLDER)
@@ -104,7 +106,7 @@ class ConfigTools:
                 # Get app config
                 config_parser.read(APP_CONFIG_PATH)
 
-                config[APP] = {}
+                evalutated_config = cls.get_evaluated_config_as_dict(config_parser)
 
                 # Load app config
                 config[APP] = {}
@@ -112,8 +114,10 @@ class ConfigTools:
                 if INCLUDE_DEFAULT_CONFIG:
                     config[APP] = APP_DEFAULT_CONFIG
 
-                for section in config_parser.sections():
-                    config[APP][section] = dict(config_parser[section])
+                config[APP] = {
+                    **config[APP],
+                    **evalutated_config
+                }
 
                 # Add app to package manifest
                 config_package_manifest.append(APP)
@@ -124,16 +128,54 @@ class ConfigTools:
 
         # Initialize cache before accessing
         CacheTools.initialize(
-            host = PROJECT_CONFIG.get('CACHE_HOST'),
-            port = PROJECT_CONFIG.get('CACHE_PORT'),
-            decode_strings = PROJECT_CONFIG.get('CACHE_DECODE_STRINGS'),
+            host = PROJECT_CONFIG.get('cache_host'),
+            port = PROJECT_CONFIG.get('cache_port'),
+            decode_strings = PROJECT_CONFIG.get('cache_decode_strings'),
         )
 
         CacheTools.set(key_value = {
             CONFIG_CACHE_KEY : config,
             f'{CONFIG_CACHE_KEY}_package_manifest' : config_package_manifest
         })
-    
+
+
+    #
+    # Get Evaluated Config As Dict
+    # @param ConfigParser config_parser The config parser to get the dict from
+    # @returns dict The evaluated config as a dict
+    #
+    @staticmethod
+    def get_evaluated_config_as_dict(config_parser: configparser.ConfigParser):
+        evaluated_dict = {}
+
+        for section in config_parser.sections():
+            evaluated_dict[section] = {}
+            for key in config_parser[section]:
+
+                value = config_parser[section][key]
+
+                try:
+                    value = config_parser.getint(section, key)
+                
+                except ValueError:
+                    pass
+
+                try:
+                    value = config_parser.getfloat(section, key)
+
+                except ValueError:
+                    pass
+
+                try:
+                    value = config_parser.getboolean(section, key)
+
+                except ValueError:
+                    pass
+
+                evaluated_dict[section][key] = value
+
+        return evaluated_dict
+
 
     #
     # Fetch

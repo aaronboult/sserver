@@ -118,19 +118,19 @@ class ModuleTools:
         Logger.log('module_name', module_name)
 
         # Get apps folder
-        app_folder = ConfigTools.fetch('APP_FOLDER')
+        APP_FOLDER = ConfigTools.fetch('app_folder')
 
-        if app_folder is None:
-            raise Exception('APP_FOLDER not set in config')
+        if APP_FOLDER is None:
+            raise Exception('app_folder not set in config')
 
-        if not isinstance(app_folder, str):
-            raise TypeError('APP_FOLDER must be of type str')
+        if not isinstance(APP_FOLDER, str):
+            raise TypeError('app_folder must be of type str')
 
         # Seperate module path
         module_path = module_name.split('.')
 
         # Get index of app folder
-        app_folder_index = module_path.index(app_folder)
+        APP_FOLDER_INDEX = module_path.index(APP_FOLDER)
 
         # Return app name
-        return module_path[app_folder_index + 1]
+        return module_path[APP_FOLDER_INDEX + 1]

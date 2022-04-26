@@ -33,12 +33,12 @@ class RouteTools:
 
         route_manifest = []
 
-        prefix_with_app_name = ConfigTools.fetch('PREFIX_ROUTE_WITH_APP_NAME')
+        prefix_with_app_name = ConfigTools.fetch('prefix_route_with_app_name')
         if prefix_with_app_name == None:
             prefix_with_app_name = False
 
         elif not isinstance(prefix_with_app_name, bool):
-            raise TypeError(f'Config value for PREFIX_ROUTE_WITH_APP_NAME must be a boolean, got type {type(prefix_with_app_name)}')
+            raise TypeError(f'Config value for prefix_route_with_app_name must be a boolean, got type {type(prefix_with_app_name)}')
 
         Logger.info('Loading Routes...')
         for module in route_module_list:
