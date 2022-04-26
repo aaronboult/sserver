@@ -106,11 +106,8 @@ class CacheTools:
     def get(cls, *key_list, default = None):
         # If only one key supplies, wrap default to work with zip
         if len(key_list) == 1 or not isinstance(default, list):
-            default = [default]
+            default = (default,)
 
-        # Convert each key into a tuple to allow passing with *
-        key_list = list(map(lambda key: (key,), key_list))
-        Logger.log('key_list', key_list)
         if isinstance(default, list):
             KEY_LIST_LENGTH = len(key_list)
             DEFAULT_LENGTH = len(default)
@@ -118,6 +115,9 @@ class CacheTools:
             # Ensure default list is at least as long as key list
             if KEY_LIST_LENGTH > DEFAULT_LENGTH:
                 default.extend(None for _ in range(KEY_LIST_LENGTH - DEFAULT_LENGTH))
+
+        # Convert each key into a tuple to allow passing with *
+        key_list = list(zip(key_list, default))
 
         # Generate a list of values using the key list
         # Passes either just a key or key, default
