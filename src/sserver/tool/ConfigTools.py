@@ -144,37 +144,52 @@ class ConfigTools:
     # @param ConfigParser config_parser The config parser to get the dict from
     # @returns dict The evaluated config as a dict
     #
-    @staticmethod
-    def get_evaluated_config_as_dict(config_parser: configparser.ConfigParser):
+    @classmethod
+    def get_evaluated_config_as_dict(cls, config_parser: configparser.ConfigParser):
         evaluated_dict = {}
 
         for section in config_parser.sections():
             evaluated_dict[section] = {}
             for key in config_parser[section]:
-
-                value = config_parser[section][key]
-
-                try:
-                    value = config_parser.getint(section, key)
-                
-                except ValueError:
-                    pass
-
-                try:
-                    value = config_parser.getfloat(section, key)
-
-                except ValueError:
-                    pass
-
-                try:
-                    value = config_parser.getboolean(section, key)
-
-                except ValueError:
-                    pass
-
-                evaluated_dict[section][key] = value
+                evaluated_dict[section][key] = cls.evaluate_config_value(
+                    config_parser,
+                    section,
+                    key,
+                )
 
         return evaluated_dict
+
+
+    #
+    # Evaluate Value From Config
+    # @param ConfigParser config_parser The config parser to evaluate the value from
+    # @param str section The section to evaluate the value from
+    # @param str key The key to evaluate the value from
+    # @returns mixed The evaluated value
+    #
+    @staticmethod
+    def evaluate_config_value(config_parser: configparser.ConfigParser, section, key):
+        
+        # Nested function for testing multiple methods
+        def try_evaluate(converter):
+            try:
+                return converter(section, key)
+
+            except ValueError:
+                return None
+
+        value = try_evaluate(config_parser.getint)
+
+        if value is None:
+            value = try_evaluate(config_parser.getfloat)
+
+        if value is None:
+            value = try_evaluate(config_parser.getboolean)
+
+        if value is None:
+            value = config_parser[section][key]
+
+        return value
 
 
     #
