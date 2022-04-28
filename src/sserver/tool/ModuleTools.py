@@ -20,9 +20,6 @@ class ModuleTools:
     @classmethod
     def load_from_filename(cls, filename, modules = None, package = None, folder_list = None):
 
-        Logger.log('loading from filename', filename)
-        Logger.log('package', package)
-
         if modules is None:
             modules = []
 
@@ -114,8 +111,6 @@ class ModuleTools:
     #
     @classmethod
     def get_app_name(cls, module_name):
-
-        Logger.log('module_name', module_name)
 
         # Get apps folder
         APP_FOLDER = ConfigTools.fetch('app_folder')
