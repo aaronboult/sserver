@@ -222,7 +222,7 @@ class ConfigTools:
     # @returns mixed The value of the key
     #
     @classmethod
-    def nested_fetch(cls, *key_list, app_name = '__project__'):
+    def nested_fetch(cls, *key_list, default = None, app_name = '__project__'):
         value = None
 
         if len(key_list) > 0:
@@ -232,7 +232,7 @@ class ConfigTools:
             # Go down the tree fetching keys
             tree_complete = True
             key_list = key_list[1:]
-            for index, key in enumerate(key_list):
+            for key in key_list:
                 if not hasattr(node, '__getitem__'):
                     tree_complete = False
                     break
@@ -242,7 +242,7 @@ class ConfigTools:
             if tree_complete:
                 value = node
 
-        return value
+        return default if value is None else value
 
 
     #
