@@ -162,7 +162,7 @@ class Logger:
             list: cls.format_list,
             tuple: cls.format_list,
             set: cls.format_list,
-            str: lambda string_value: f'"{str(string_value)}"'
+            str: lambda string_value, **kwargs: f'"{str(string_value)}"'
         }
 
         text = None
@@ -203,10 +203,9 @@ class Logger:
         text = '{\n'
         
         for key, value in dict_value.items():
-            indent_level += 1
             current_indent = '\t' * (indent_level + 1)
 
-            formatted_value = cls.format(value, indent_level = indent_level, **kwargs)
+            formatted_value = cls.format(value, indent_level = indent_level + 1, **kwargs)
 
             text += f'{current_indent}"{key}"{cls.delimiter}{formatted_value},\n'
 
@@ -214,7 +213,7 @@ class Logger:
             text = '\t' * (indent_level - 1) + '{}'
 
         else:
-            text += '\t' * (indent_level) + '}'
+            text += '\t' * indent_level + '}'
 
         return text
 
@@ -328,14 +327,22 @@ class Logger:
                 trail = ','
 
             if use_multiline:
-                indent_level += 1
-                text += f'\n{"\t" * (indent_level + 1)}'
+                indent_text = '\t' * (indent_level + 1)
+                text += f'\n{indent_text}'
 
-            text += f'{cls.format(value, **kwargs)}{trail}'
+            formatted_value = cls.format(
+                value,
+                use_multiline = use_multiline,
+                indent_level = indent_level + 1,
+                **kwargs
+            )
+
+            text += f'{formatted_value}{trail}'
 
 
         if use_multiline:
-            text += f'\n{"\t" * indent_level}'
+            indent_text = '\t' * indent_level
+            text += f'\n{indent_text}'
 
         # Close the wrapper
         text += wrappers[1]
