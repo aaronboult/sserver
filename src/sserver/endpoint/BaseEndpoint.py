@@ -6,8 +6,7 @@ from sserver.tool.TemplateTools import TemplateTools
 
 
 class BaseEndpoint(OptionMixin):
-    """
-    The base class for all endpoints to inherit from.
+    """The base class for all endpoints to inherit from.
 
     ...
 
@@ -20,8 +19,7 @@ class BaseEndpoint(OptionMixin):
 
 
     def get(self, **context: Any) -> str:
-        """
-        Handles HTTP GET requests.
+        """Handles HTTP GET requests.
         To be overriden by subclasses to provide custom functionality.
 
         Args:
@@ -52,8 +50,7 @@ class BaseEndpoint(OptionMixin):
 
 
     def post(self) -> str:
-        """
-        Handles HTTP POST requests.
+        """Handles HTTP POST requests.
 
         Note:
             To be overriden by subclasses to provide custom functionality.
@@ -68,8 +65,7 @@ class BaseEndpoint(OptionMixin):
 
 
     def put(self) -> str:
-        """
-        Handles HTTP PUT requests.
+        """Handles HTTP PUT requests.
         
         Note:
             To be overriden by subclasses to provide custom functionality.
@@ -84,8 +80,7 @@ class BaseEndpoint(OptionMixin):
 
 
     def patch(self) -> str:
-        """
-        Handles HTTP PATCH requests.
+        """Handles HTTP PATCH requests.
         
         Note:
             To be overriden by subclasses to provide custom functionality.
@@ -100,8 +95,7 @@ class BaseEndpoint(OptionMixin):
 
 
     def delete(self) -> str:
-        """
-        Handles HTTP DELETE requests.
+        """Handles HTTP DELETE requests.
         
         Note:
             To be overriden by subclasses to provide custom functionality.
@@ -116,8 +110,7 @@ class BaseEndpoint(OptionMixin):
 
 
     def get_app_name(self) -> str:
-        """
-        Gets the app name of the calling endpoint.
+        """Gets the app name of the calling endpoint.
 
         Returns:
             `str`: The app name
@@ -127,8 +120,7 @@ class BaseEndpoint(OptionMixin):
 
 
     def get_config(self) -> Dict[str, Union[str, int, float, bool, None]]:
-        """
-        Gets the config of the calling endpoint.
+        """Gets the config of the calling endpoint.
 
         Returns:
             `Dict[str, str | int | float | bool | None]`: The config in the format `{ Key : Config Value }`
@@ -142,8 +134,7 @@ class BaseEndpoint(OptionMixin):
 
 
     def get_from_config(self, *key_list: str, default: Any = None) -> Union(str, int, float, bool, None):
-        """
-        Gets a value from the config using `*key_list` as a path through the config.
+        """Gets a value from the config using `*key_list` as a path through the config.
 
         Args:
             *key_list (`str`): The keys to use to get the value from the config.
