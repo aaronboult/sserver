@@ -8,10 +8,8 @@ from sserver.tool.TemplateTools import TemplateTools
 class BaseEndpoint(OptionMixin):
     """The base class for all endpoints to inherit from.
 
-    ...
-
     Attributes:
-        template (`str`, optional): The template name to use for the response
+        template (`str`, optional): The template name to use for the response.
     """
 
 
@@ -23,13 +21,13 @@ class BaseEndpoint(OptionMixin):
         To be overriden by subclasses to provide custom functionality.
 
         Args:
-            **context (`Any`, optional): Keyword arguments passed to the `template` as `context` if the `template` is set
+            **context (`Any`, optional): Keyword arguments passed to the `template` as `context` if the `template` is set.
 
         Returns:
-            `str`: The rendered `template` or an empty string
+            `str`: The rendered `template` or an empty string.
 
         Raises:
-            `TypeError`: If the `template` is set but is not a string
+            TypeError: If the `template` is set but is not a string.
 
         """
 
@@ -56,7 +54,7 @@ class BaseEndpoint(OptionMixin):
             To be overriden by subclasses to provide custom functionality.
 
         Returns:
-            `str`: An empty string by default
+            `str`: An empty string by default.
         """
 
         raise NotImplementedError('BaseEndpoint.post() not implemented')
@@ -71,7 +69,7 @@ class BaseEndpoint(OptionMixin):
             To be overriden by subclasses to provide custom functionality.
 
         Returns:
-            `str`: An empty string by default
+            `str`: An empty string by default.
         """
 
         raise NotImplementedError('BaseEndpoint.put() not implemented')
@@ -86,7 +84,7 @@ class BaseEndpoint(OptionMixin):
             To be overriden by subclasses to provide custom functionality.
 
         Returns:
-            `str`: An empty string by default
+            `str`: An empty string by default.
         """
 
         raise NotImplementedError('BaseEndpoint.patch() not implemented')
@@ -101,7 +99,7 @@ class BaseEndpoint(OptionMixin):
             To be overriden by subclasses to provide custom functionality.
 
         Returns:
-            `str`: An empty string by default
+            `str`: An empty string by default.
         """
 
         raise NotImplementedError('BaseEndpoint.delete() not implemented')
@@ -113,7 +111,7 @@ class BaseEndpoint(OptionMixin):
         """Gets the app name of the calling endpoint.
 
         Returns:
-            `str`: The app name
+            `str`: The app name.
         """
 
         return ModuleTools.get_app_name(self.__module__)
@@ -123,7 +121,7 @@ class BaseEndpoint(OptionMixin):
         """Gets the config of the calling endpoint.
 
         Returns:
-            `Dict[str, str | int | float | bool | None]`: The config in the format `{ Key : Config Value }`
+            `Dict[str, str | int | float | bool | None]`: The config in the format `{ Key : Config Value }`.
 
         Example:
             >>> print([endpoit_instance.get_config()])
@@ -139,10 +137,11 @@ class BaseEndpoint(OptionMixin):
         Args:
             *key_list (`str`): The keys to use to get the value from the config.
                 These keys are treated as a path through the config, similar to a tree.
-            default (`Any`, optional): The value to return if the key is not found
+            default (`Any`, optional): The value to return if the key is not found.
+                Defaults to `None`.
 
         Returns:
-            `str | int | float | bool | None`: The value from the config, or `default` if not found
+            `str | int | float | bool | None`: The value from the config, or `default` if not found.
 
         Example:
             >>> # Using the below config
