@@ -1,51 +1,65 @@
 import pickle
+from typing import Any, Callable, Dict, List, Union
 from sserver.log.Logger import Logger
 from sserver.tool.exception import (
     CacheNotInitializedException,
     CacheAlreadyInitializedException
 )
-import redis
+from redis import Redis
 from functools import wraps
 
 
-#
-# Cache Tools
-#
 class CacheTools:
+    """Handles cache operations."""
 
 
-    #
-    # Cache Instance
-    #
-    __cache_instance = None
+    __cache_instance: Redis = None
 
 
-    #
-    # Requires Lock Decorator
-    #
-    def requires_lock(func):
+    def requires_lock(func: Callable) -> Callable:
+        """Requires lock decorate; ensures the cache is locked when function
+        is executing.
+
+        Args:
+            func (`Callable`): The decorated function.
+
+        Returns:
+            `Callable`: The wrapped function.
+        """
+
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any):
             return func(*args, **kwargs)
+            # try:
+            #     with r.lock('my-lock-key', blocking_timeout=5) as lock:
+            #         # code you want executed only after the lock has been acquired
+            #         pass
+            # except redis.LockError:
+            #     # the lock wasn't acquired
+            #     pass
+
         return wrapper
-        # try:
-        #     with r.lock('my-lock-key', blocking_timeout=5) as lock:
-        #         # code you want executed only after the lock has been acquired
-        #         pass
-        # except redis.LockError:
-        #     # the lock wasn't acquired
-        #     pass
 
 
-    #
-    # Initialize
-    #
     @classmethod
-    def initialize(cls, host, port, decode_strings = True, db = 0):
+    def initialize(cls, host: str, port: int, decode_strings: bool = True, db: int = 0):
+        """Initialize the cache.
+
+        Args:
+            host (`str`): The cache hostname.
+            port (`int`): The cache port.
+            decode_strings (`bool`, optional): Whether or not to decode
+                strings by default. Defaults to True.
+            db (`int`, optional): The database number. Defaults to 0.
+
+        Raises:
+            CacheAlreadyInitializedException: If the cache is already initialized.
+        """
+
         if cls.is_ready():
             raise CacheAlreadyInitializedException('Cache already initialized')
 
-        cls.__cache_instance = redis.Redis(
+        cls.__cache_instance = Redis(
             host = host,
             port = port,
             db = db,
@@ -54,56 +68,78 @@ class CacheTools:
         )
 
 
-    #
-    # Get Cache Instance
-    #
     @classmethod
-    def get_cache_instance(cls):
+    def get_cache_instance(cls) -> Redis:
+        """Get the current cache instance.
+
+        Raises:
+            CacheNotInitializedException: If the cache is not initialized.
+
+        Returns:
+            `Redis`: The cache instance.
+        """
+
         if not cls.is_ready():
             raise CacheNotInitializedException('Cache must be initialized before use')
 
         return cls.__cache_instance
 
 
-    #
-    # Is Ready
-    #
     @classmethod
-    def is_ready(cls):
+    def is_ready(cls) -> bool:
+        """Checks if the cache is ready for use.
+
+        Returns:
+            `bool`: True if the cache is ready for use, otherwise False.
+        """
+
         return cls.__cache_instance is not None
 
 
-    #
-    # Clear Cache
-    #
     @classmethod
     @requires_lock
     def clear(cls):
+        """Clear the cache."""
+
         Logger.info('Clearing cache')
         cls.get_cache_instance().flushdb()
 
 
-    #
-    # Pop
-    # @param str key The key to pop
-    # @returns mixed The value of the key
-    #
     @classmethod
-    def pop(cls, key, default = None):
+    def pop(cls, key: str, default: Any = None) -> Any:
+        """Get a value from the cache and remove the cache entry.
+
+        Args:
+            key (`str`): The key to get the value from.
+            default (`Any`, optional): The value to return if the key is not
+                found. Defaults to None.
+
+        Returns:
+            `Any`: The value from the cache, or `default` if not found.
+        """
+
         value = cls.get(key, default = default)
+
         cls.delete(key)
+
         return value
 
 
-    #
-    # Get
-    # @param str|list key The key(s) to get
-    # @param mixed default The default value
-    # @returns mixed The value of the key
-    #
     @classmethod
     @requires_lock
-    def get(cls, *key_list, default = None):
+    def get(cls, *key_list: str, default: Union[Any, List[Any]] = None) -> Union[Any, List[Any]]:
+        """Get values from the cache.
+
+        Args:
+            *key_list (`str`): The list of keys to get.
+            default (`Any` | `List[Any]`, optional): The default value or list of values.
+                Defaults to None.
+
+        Returns:
+            `Any` | `List[Any]`: The values from the cache, or single value
+                if only one key, or the associated default value if not found.
+        """
+
         # If only one key supplies, wrap default to work with zip
         if len(key_list) == 1 or not isinstance(default, list):
             default = (default,)
@@ -129,30 +165,46 @@ class CacheTools:
         return value
 
 
-    #
-    # Get
-    # @param str key The key to get
-    # @param mixed default The default value
-    # @returns mixed The value of the key
-    #
     @classmethod
-    def _get(cls, key, default = None):
-        if key is None:
-            raise TypeError('Cache key cannot be None')
+    def _get(cls, key: str, default: Any = None) -> Any:
+        """Get the value at `key` from the cache.
+
+        Args:
+            key (`str`): The key to get the value from.
+            default (`Any`, optional): The default value if `key` is not
+                found. Defaults to None.
+
+        Raises:
+            TypeError: If the key is not a string.
+
+        Returns:
+            `Any`: The value from the cache or `default` if not found.
+        """
+
+        if not isinstance(key, str):
+            raise TypeError('Cache key must be of type str')
 
         value = cls.get_cache_instance().get(key)
 
         return default if value is None else cls.deserialize(value)
 
 
-    #
-    # Set
-    # @param str key The key to set
-    # @param bytes value The value to set
-    #
     @classmethod
     @requires_lock
-    def set(cls, key = None, value = None, key_value = None):
+    def set(cls, key: str = None, value: Any = None, key_value: Dict[str, Any] = None):
+        """Set the key `key` to value `value` in the cache, or store the same
+        key-value mappings in `key_value` in the cache.
+
+        Args:
+            key (`str`, optional): The key to store in. Defaults to None.
+            value (`Any`, optional): The value to store in. Defaults to None.
+            key_value (`Dict[str, Any]`, optional): The key value mappings
+                to store. Defaults to None.
+
+        Raises:
+            TypeError: If the key is not a string when `key_value` is not passed.
+        """
+
         if isinstance(key_value, dict):
             for key, value in key_value.items():
                 cls.set(key, value)
@@ -164,29 +216,41 @@ class CacheTools:
         cls.get_cache_instance().set(key, cls.serialize(value))
 
 
-    #
-    # Serialize
-    # @param mixed value The value to serialize
-    #
     @staticmethod
-    def serialize(value):
+    def serialize(value: Any) -> bytes:
+        """Serialize `value` into an array of bytes.
+
+        Args:
+            value (`Any`): The value to serialize.
+
+        Returns:
+            `bytes`: The serialized value.
+        """
+
         return pickle.dumps(value)
 
 
-    #
-    # Deserialize
-    # @param bytes value The value to deserialize
-    #
     @staticmethod
-    def deserialize(value):
-        return pickle.loads(value)
+    def deserialize(byte_stream: bytes) -> Any:
+        """Deserialize `byte_stream` into its original form.
+
+        Args:
+            byte_stream (`bytes`): The bytes to deserialize.
+
+        Returns:
+            `Any`: The original form of `byte_stream`.
+        """
+
+        return pickle.loads(byte_stream)
 
 
-    #
-    # Delete
-    # @param str key The key to delete
-    #
     @classmethod
-    def delete(cls, *keys):
+    def delete(cls, *keys: str):
+        """Delete `keys` from the cache.
+
+        Args:
+            *keys (`str`): The keys to remove from the cache.
+        """
+
         if len(keys) > 0:
             cls.get_cache_instance().delete(*keys)
