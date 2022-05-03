@@ -1,6 +1,8 @@
-import configparser
+
+from configparser import ConfigParser
 import os
 import sys
+from typing import Any, Dict, Union
 from sserver.config import (
     CONFIG_CACHE_KEY,
     SSERVER_CONFIG,
@@ -11,29 +13,46 @@ from sserver.log.Logger import Logger
 from sserver.tool.CacheTools import CacheTools
 from sserver.tool.PathTools import PathTools
 
-#
-# Config Tools
-#
+
 class ConfigTools:
+    """Handles loading configuration files and config operations."""
 
 
-    #
-    # Load Config
-    #
     @staticmethod
     def clear():
+        """Clear the config."""
+
         Logger.info('Clearing config')
         CacheTools.delete('config')
-    
 
-    #
-    # Load
-    #
+
     @classmethod
-    def load(cls, **kwargs):
+    def load(cls, filename: str = 'config.py', include_default_config: bool = True):
+        """Load project and app config files.
 
+        Args:
+            filename (`str`, optional): The config file filename. Defaults to
+                'config.py'.
+            include_default_config (`bool`, optional): Whether or not to
+                include default configuration values. Defaults to True.
+
+        Raises:
+            TypeError: If the `filename` is not a string.
+            TypeError: If  `include_default_config` is not a boolean.
+        """
+
+        # Check filename and include_default_config
+        if not isinstance(filename, str):
+            raise TypeError('config_filename must be of type str')
+
+        if not isinstance(include_default_config, bool):
+            raise TypeError('include_sserver_default_config must be of type bool')
+
+
+        # Clear cache if cache tools initialized
         if CacheTools.is_ready():
             cls.clear()
+
 
         Logger.info('Loading config...')
 
@@ -44,31 +63,11 @@ class ConfigTools:
         config_package_manifest = []
 
 
-        # Get filename for config files
-        CONFIG_FILENAME = kwargs.get('filename')
-        if CONFIG_FILENAME == None:
-            CONFIG_FILENAME = 'config.ini'
-            Logger.info('No filename found in kwargs, defaulting to config.py')
-
-        if not isinstance(CONFIG_FILENAME, str):
-            raise TypeError('config_filename must be of type str')
-
-
-        # Get whether default config values should be used
-        INCLUDE_DEFAULT_CONFIG = kwargs.get('include_sserver_default_config')
-        if INCLUDE_DEFAULT_CONFIG is None:
-            INCLUDE_DEFAULT_CONFIG = True
-            Logger.info('No include_sserver_default_config found in kwargs, defaulting to True')
-
-        if not isinstance(INCLUDE_DEFAULT_CONFIG, bool):
-            raise TypeError('include_sserver_default_config must be of type bool')
-
-
         # Get project config
-        config_parser = configparser.ConfigParser()
+        config_parser = ConfigParser()
 
         # Load project config file
-        PROJECT_CONFIG_PATH = os.path.join(sys.path[0], CONFIG_FILENAME)
+        PROJECT_CONFIG_PATH = os.path.join(sys.path[0], filename)
         config_parser.read(PROJECT_CONFIG_PATH)
 
         evalutated_config = cls.get_evaluated_config_as_dict(config_parser)
@@ -76,7 +75,7 @@ class ConfigTools:
         # Load project config
         PROJECT_CONFIG = {}
 
-        if INCLUDE_DEFAULT_CONFIG:
+        if include_default_config:
             PROJECT_CONFIG = PROJECT_DEFAULT_CONFIG
 
         if 'project' in evalutated_config:
@@ -101,7 +100,7 @@ class ConfigTools:
         # Load configs from each app
         for APP in APP_DIRECTORY_LIST:
             if APP != '__pycache__':
-                APP_CONFIG_PATH = os.path.join(APP_DIRECTORY_PATH, APP, CONFIG_FILENAME)
+                APP_CONFIG_PATH = os.path.join(APP_DIRECTORY_PATH, APP, filename)
 
                 # Get app config
                 config_parser.read(APP_CONFIG_PATH)
@@ -111,7 +110,7 @@ class ConfigTools:
                 # Load app config
                 config[APP] = {}
 
-                if INCLUDE_DEFAULT_CONFIG:
+                if include_default_config:
                     config[APP] = APP_DEFAULT_CONFIG
 
                 config[APP] = {
@@ -126,6 +125,7 @@ class ConfigTools:
         Logger.info('Loaded Configs', config)
         Logger.info('Loaded Package Manifest', config_package_manifest)
 
+
         # Initialize cache before accessing
         CacheTools.initialize(
             host = PROJECT_CONFIG.get('cache_host'),
@@ -139,13 +139,18 @@ class ConfigTools:
         })
 
 
-    #
-    # Get Evaluated Config As Dict
-    # @param ConfigParser config_parser The config parser to get the dict from
-    # @returns dict The evaluated config as a dict
-    #
     @classmethod
-    def get_evaluated_config_as_dict(cls, config_parser: configparser.ConfigParser):
+    def get_evaluated_config_as_dict(cls, config_parser: ConfigParser) -> Dict[Any, Union[str, int, float, bool]]:
+        """Evaluate the dict in `config_parser`.
+
+        Args:
+            config_parser (`ConfigParser`): The config parser to get the dict
+                from.
+
+        Returns:
+            `Dict[Any, str | int | float | bool]`: The evaluated dict
+        """
+
         evaluated_dict = {}
 
         for section in config_parser.sections():
@@ -160,16 +165,25 @@ class ConfigTools:
         return evaluated_dict
 
 
-    #
-    # Evaluate Value From Config
-    # @param ConfigParser config_parser The config parser to evaluate the value from
-    # @param str section The section to evaluate the value from
-    # @param str key The key to evaluate the value from
-    # @returns mixed The evaluated value
-    #
     @staticmethod
-    def evaluate_config_value(config_parser: configparser.ConfigParser, section, key):
-        
+    def evaluate_config_value(config_parser: ConfigParser, section: str, key: str) -> Union[str, int, float, bool]:
+        """Evaluate config value in `section` with key `key`.
+
+        Args:
+            config_parser (`ConfigParser`): The config parser to evaluate the
+                value from.
+            section (`str`): The section to get the value from.
+            key (`str`): The key to get the value from.
+
+        Note:
+            The value will first be evaluated as an integer, followed by a
+            float, boolean and finally the string value will be returned if
+            all else fails.
+
+        Returns:
+            `str` | `int` | `float` | `bool`: The evaluated value.
+        """
+
         # Nested function for testing multiple methods
         def try_evaluate(converter):
             try:
@@ -192,14 +206,21 @@ class ConfigTools:
         return value
 
 
-    #
-    # Fetch
-    # @param str key The key to fetch from the project config
-    # @param str app_name The app to fetch from
-    # @returns mixed The value of the key
-    #
     @classmethod
-    def fetch(cls, key, app_name = '__project__'):
+    def fetch(cls, key: str, app_name: str = '__project__') -> Union[str, int, float, bool]:
+        """Fetch the value at `key` from app `app_name`.
+
+        Args:
+            key (`str`): The key to fetch the value from.
+            app_name (`str`, optional): The app name to fetch from. Defaults
+                to '__project__'.
+
+        Raises:
+            TypeError: If the `key` is not a string.
+
+        Returns:
+            `str` | `int` | `float` | `bool`: The value from the config.
+        """
 
         Logger.log('fetching', key)
         Logger.log('with app_name', app_name)
@@ -215,14 +236,21 @@ class ConfigTools:
         return app_config.get(key)
 
 
-    #
-    # Nested Fetch
-    # @param str *key_list The list of keys in descending nested order to fetch
-    # @param str app_name The app to fetch from
-    # @returns mixed The value of the key
-    #
     @classmethod
-    def nested_fetch(cls, *key_list, default = None, app_name = '__project__'):
+    def nested_fetch(cls, *key_list: str, default: Any = None, app_name: str = '__project__') -> Union[str, int, float, bool, None]:
+        """Fetch a value, descending down the config tree by iterating over `key_list`.
+
+        Args:
+            default (`Any`, optional): The value to return if no config value
+                is found. Defaults to None.
+            app_name (`str`, optional): The app name to fetch the config
+                value from. Defaults to '__project__'.
+
+        Returns:
+            `str` | `int` | `float` | `bool` | `None`: The value from the
+                config.
+        """
+
         value = None
 
         if len(key_list) > 0:
@@ -245,13 +273,19 @@ class ConfigTools:
         return default if value is None else value
 
 
-    #
-    # Fetch App
-    # @param str app_name The name of the app to fetch from
-    # @returns dict The apps config
-    #
     @classmethod
-    def fetch_app(cls, app_name):
+    def fetch_app(cls, app_name: str) -> Dict[Any, Union[str, int, float, bool]]:
+        """Fetch the config for app with name `app_name`.
+
+        Args:
+            app_name (`str`): The name of the app to fetch the config from.
+
+        Raises:
+            TypeError: If the `app_name` is not a string.
+
+        Returns:
+            `Dict[Any, Union[str, int, float, bool]]`: The app config.
+        """
 
         Logger.info('Fetching app with name', app_name)
 
