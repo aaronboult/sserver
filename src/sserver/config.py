@@ -18,5 +18,5 @@ PROJECT_DEFAULT_CONFIG = {
 
 
 APP_DEFAULT_CONFIG = {
-    'TEMPLATE_FOLDER' : 'templates',
+    'template_folder' : 'templates',
 }

@@ -21,8 +21,8 @@ class TemplateTools:
             `Template` | `None`: The template object, or None if not found.
         """
 
-        APP_FOLDER = ConfigTools.fetch('APP_FOLDER')
-        TEMPLATE_FOLDER = ConfigTools.fetch('TEMPLATE_FOLDER', app_name = app_name)
+        APP_FOLDER = ConfigTools.fetch('app_folder')
+        TEMPLATE_FOLDER = ConfigTools.fetch('template_folder', app_name = app_name)
         TEMPLATE_FOLDER_PATH = f'{APP_FOLDER}.{app_name}'
 
         try:

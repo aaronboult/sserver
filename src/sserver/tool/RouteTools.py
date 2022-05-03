@@ -17,8 +17,8 @@ class RouteTools:
         CacheTools.delete(*route_manifest)
 
 
-    @staticmethod
-    def load():
+    @classmethod
+    def load(cls):
         """Load routes from each `routes.py` file in the project.
 
         Future:
@@ -29,7 +29,7 @@ class RouteTools:
                 bool.
         """
 
-        RouteTools.clear()
+        cls.clear()
 
         route_module_list = ModuleTools.load_from_filename('routes.py')
 
@@ -57,7 +57,7 @@ class RouteTools:
                     app_name = ModuleTools.get_app_name(module.__name__)
                     route.url = f'/{app_name}{route.url}'
 
-                Logger.log('Found Route {}, handled by {}'.format(route.url, str(route.endpoint)))
+                Logger.info('Found Route {}, handled by {}'.format(route.url, str(route.endpoint)))
 
                 # Assign route and add to manifest
                 CacheTools.set(route.url, route)

@@ -27,7 +27,7 @@ class ConfigTools:
 
 
     @classmethod
-    def load(cls, filename: str = 'config.py', include_default_config: bool = True):
+    def load(cls, filename: str = 'config.ini', include_default_config: bool = True):
         """Load project and app config files.
 
         Args:
@@ -79,6 +79,7 @@ class ConfigTools:
             PROJECT_CONFIG = PROJECT_DEFAULT_CONFIG
 
         if 'project' in evalutated_config:
+
             PROJECT_CONFIG = {
                 **PROJECT_CONFIG,
                 **evalutated_config['project']
@@ -221,9 +222,6 @@ class ConfigTools:
         Returns:
             `str` | `int` | `float` | `bool`: The value from the config.
         """
-
-        Logger.log('fetching', key)
-        Logger.log('with app_name', app_name)
 
         if not isinstance(key, str):
             raise TypeError('key must be of type str')
