@@ -5,11 +5,11 @@ class OptionMixin:
     """A mixin giving classes assigned options."""
 
 
-    def __init__(self, options: Dict[Any] = None):
+    def __init__(self, options: Dict[Any, Any] = None):
         """Pass options in the class constructor.
 
         Args:
-            options (`Dict[Any]`, optional): The class
+            options (`Dict[Any, Any]`, optional): The class
             options. Defaults to None.
         """
 
@@ -19,21 +19,21 @@ class OptionMixin:
             self.setOptions(options)
 
 
-    def setOptions(self, options: Dict[Any]):
+    def setOptions(self, options: Dict[Any, Any]):
         """Set the class options.
 
         Args:
-            options (`Dict[Any]`): The class options.
+            options (`Dict[Any, Any]`): The class options.
         """
 
         self._options = options
 
 
-    def getOptions(self) -> Dict[Any]:
+    def getOptions(self) -> Dict[Any, Any]:
         """Get the class options.
 
         Returns:
-            `Dict[Any]`: The class options.
+            `Dict[Any, Any]`: The class options.
         """
 
         return self._options

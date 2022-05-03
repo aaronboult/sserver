@@ -43,12 +43,12 @@ class TemplateTools:
 
 
     @staticmethod
-    def render(template: Template, context: Dict[Any]) -> str:
+    def render(template: Template, context: Dict[Any, Any]) -> str:
         """Render the given `template` using `context`.
 
         Args:
             template (`Template`): The template to render.
-            context (`Dict[Any]`): The context passed to the template.
+            context (`Dict[Any, Any]`): The context passed to the template.
 
         Returns:
             `str`: The rendered template as a string.
@@ -58,13 +58,13 @@ class TemplateTools:
     
 
     @classmethod
-    def load(cls, app_name: str, template_name: str, context: Dict[Any]) -> str:
+    def load(cls, app_name: str, template_name: str, context: Dict[Any, Any]) -> str:
         """Fetch and render the given `template` in `app_name`.
 
         Args:
             app_name (`str`): The name of the app to fetch from.
             template_name (`str`): The name of the template to fetch.
-            context (`Dict[Any]`): The context to pass to the template.
+            context (`Dict[Any, Any]`): The context to pass to the template.
 
         Raises:
             TypeError: If the `app_name` is not a string.
