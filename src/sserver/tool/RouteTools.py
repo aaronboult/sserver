@@ -7,25 +7,29 @@ from sserver.tool.CacheTools import CacheTools
 # Route Tools
 #
 class RouteTools:
+    """Handles URL routing."""
 
 
-    #
-    # Clear
-    #
     @staticmethod
     def clear():
+        """Clear the loaded routes."""
+
         Logger.info('Clearing routes')
         route_manifest = CacheTools.pop('route_manifest', default = [])
         CacheTools.delete(*route_manifest)
 
 
-
-
-    #
-    # Load
-    #
     @staticmethod
     def load():
+        """Load routes from each `routes.py` file in the project.
+
+        Future:
+            `routes.py` will be moved into the project config.
+
+        Raises:
+            TypeError: If the `prefix_with_app_name` config value is not a
+                bool.
+        """
 
         RouteTools.clear()
 
