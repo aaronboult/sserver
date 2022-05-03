@@ -3,12 +3,12 @@ class CacheNotInitializedException(Exception):
     yet been initialized.
     """
 
-    pass
-
 
 class CacheAlreadyInitializedException(Exception):
     """Raised when initialization is attempted on the cache, but it has
     already been initialized.
     """
 
-    pass
+
+class MissingConfigValueException(Exception):
+    """Raised when an invalid config value is set."""
