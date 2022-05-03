@@ -1,46 +1,53 @@
+from typing import Any, Dict
+
+
 class OptionMixin:
+    """A mixin giving classes assigned options."""
 
 
-    def __init__(self, **kwargs):
+    def __init__(self, options: Dict[Any] = None):
+        """Pass options in the class constructor.
+
+        Args:
+            options (`Dict[Any]`, optional): The class
+            options. Defaults to None.
+        """
+
         self._options = {}
-        
-        if kwargs.get('options') is not None:
-            self.setOptions(kwargs.get('options'))
+
+        if options is not None:
+            self.setOptions(options)
 
 
-    #
-    # Set Options
-    # @param dict options The options to set
-    #
-    def setOptions(self, options):
+    def setOptions(self, options: Dict[Any]):
+        """Set the class options.
+
+        Args:
+            options (`Dict[Any]`): The class options.
+        """
+
         self._options = options
 
 
-    #
-    # Get Options
-    # @returns dict The options
-    #
-    def getOptions(self):
+    def getOptions(self) -> Dict[Any]:
+        """Get the class options.
+
+        Returns:
+            `Dict[Any]`: The class options.
+        """
+
         return self._options
 
 
-    #
-    # Get Option
-    # @param str key The key of the option to get
-    # @param mixed default The value to assign
-    #
-    def setOption(self, key, value):
+    def setOption(self, key: str, value: Any):
+        """Set the option with key `key` to `value`.
+
+        Args:
+            key (`str`): The option key.
+            value (`Any`): The option value.
+        """
+
         self._options[key] = value
-
-
-    #
-    # Set Default Option
-    # @param str key The key of the option to default
-    # @param mixed default The default value to assign
-    #
-    def setDefaultOption(self, key, value):
-        if key not in self._options:
-            self._options[key] = value
 
 
     #
@@ -48,5 +55,20 @@ class OptionMixin:
     # @param str key The key of the option to get
     # @returns mixed The value of the option
     #
-    def getOption(self, key):
-        return self._options.get(key)
+    def getOption(self, key: str, default: Any = None) -> Any:
+        """Get the value of option `key`, if not found
+        return `default`.
+
+        Args:
+            key (`str`): The option key.
+            default (`Any`, optional): The value to return
+                if `key` is not set. Defaults to None.
+
+        Returns:
+            `Any`: The value of the option.
+        """
+
+        if key in self._options:
+            return self._options.get(key)
+
+        return default
