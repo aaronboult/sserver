@@ -8,9 +8,6 @@ import importlib
 from sserver.tool.exception import MissingConfigValueException
 
 
-#
-# Module Tools
-#
 class ModuleTools:
     """Handles module operations."""
 

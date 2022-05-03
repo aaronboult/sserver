@@ -4,9 +4,6 @@ from sserver.log.Logger import Logger
 from sserver.tool.ConfigTools import ConfigTools
 
 
-#
-# Template Tools
-#
 class TemplateTools:
     """Handles templating using Jina2."""
 

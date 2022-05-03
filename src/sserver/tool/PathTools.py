@@ -5,9 +5,7 @@ from sserver.log.Logger import Logger
 from os import walk, getcwd
 from os.path import join, basename
 
-#
-# Path Tools
-#
+
 class PathTools:
     """Handles file system path operations."""
 

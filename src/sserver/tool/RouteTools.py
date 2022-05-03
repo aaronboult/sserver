@@ -3,9 +3,7 @@ from sserver.tool.ConfigTools import ConfigTools
 from sserver.tool.ModuleTools import ModuleTools
 from sserver.tool.CacheTools import CacheTools
 
-#
-# Route Tools
-#
+
 class RouteTools:
     """Handles URL routing."""
 
