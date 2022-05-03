@@ -131,7 +131,7 @@ class BaseEndpoint(OptionMixin):
         return ConfigTools.fetch_app(self.get_app_name())
 
 
-    def get_from_config(self, *key_list: str, default: Any = None) -> Union(str, int, float, bool, None):
+    def get_from_config(self, *key_list: str, default: Any = None) -> Union[str, int, float, bool, None]:
         """Gets a value from the config using `*key_list` as a path through the config.
 
         Args:

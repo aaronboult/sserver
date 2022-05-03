@@ -9,7 +9,7 @@ class TemplateTools:
 
 
     @staticmethod
-    def fetch(app_name: str, template_name: str) -> Union(Template, None):
+    def fetch(app_name: str, template_name: str) -> Union[Template, None]:
         """Fetch a template from `app_name` with name
         `template_name`.
 
