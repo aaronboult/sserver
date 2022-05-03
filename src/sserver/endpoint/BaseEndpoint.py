@@ -28,7 +28,6 @@ class BaseEndpoint(OptionMixin):
 
         Raises:
             TypeError: If the `template` is set but is not a string.
-
         """
 
         template = getattr(self, 'template', None)

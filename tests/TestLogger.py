@@ -94,7 +94,7 @@ class LoggerTest(unittest.TestCase):
     # Test Format Set
     #
     def test_format_set(self):
-        # @important The order of the items in the set is not guaranteed, so multiple expected
+        # The order of the items in the set is not guaranteed, so multiple expected
 
         st = {
             's1',

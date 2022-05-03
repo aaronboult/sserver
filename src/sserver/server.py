@@ -1,17 +1,21 @@
+from typing import Dict, List, Union
 from sserver.log.Logger import Logger
 from sserver.mixin.OptionMixin import OptionMixin
+from sserver.routes import Route
 from sserver.tool.CacheTools import CacheTools
 from sserver.tool.ConfigTools import ConfigTools
 from sserver.tool.RouteTools import RouteTools
 
 
-class Server(OptionMixin):
+class BaseServer(OptionMixin):
 
 
-    #
-    # Handle Request
-    #
-    def handle_request(self):
+    def handle_request(self) -> bytes:
+        """Handle a WSGI request.
+
+        Returns:
+            `bytes`: The response content.
+        """
 
         status, headers, content = None, None, None
 
@@ -33,7 +37,7 @@ class Server(OptionMixin):
         except Exception as e:
             Logger.exception(e, reraise = False)
 
-            # @note Ensure a response for unexplained errors
+            # Ensure a response for unexplained errors
             headers = [('Content-Type', 'text/html')]
             status = '500 Internal Server Error'
             content = b'500 Internal Server Error'
@@ -41,15 +45,17 @@ class Server(OptionMixin):
         start_response = self.getOption('start_response')
         start_response(status, headers)
 
-        return [content]
+        return content
 
 
-    #
-    # Get Response
-    #
-    def get_response(self):
+    def get_response(self) -> Dict[str, str]:
+        """Get the requests response.
 
-        # @note Wrap entire request handle in try/except to report 500 errors
+        Returns:
+            `Dict[str, str]`: The response dict.
+        """
+
+        # Wrap entire request handle in try/except to report 500 errors
         try:
 
             route = self.get_route()
@@ -67,10 +73,12 @@ class Server(OptionMixin):
             return self.handle_500()
 
 
-    #
-    # Get Route
-    #
-    def get_route(self):
+    def get_route(self) -> Union[Route, None]:
+        """Get the matching route, if any, using the REQUEST_URI.
+
+        Returns:
+            `Route` | `None`: The matching route or None if not found.
+        """
 
         environment = self.getOption('environment')
 
@@ -81,37 +89,15 @@ class Server(OptionMixin):
         return route
 
 
-    #
-    # Handle 404
-    #
-    def handle_404(self):
-        return {
-            'body' : '404 Not Found',
-        }
-    
+    def handle_route(self, route: Route) -> Dict[str, str]:
+        """Handle the request using the matched `route`.
 
-    #
-    # Handle 405
-    #
-    def handle_405(self):
-        return {
-            'body' : '405 Method Not Allowed',
-        }
-    
+        Args:
+            route (`Route`): The matched route.
 
-    #
-    # Handle 500
-    #
-    def handle_500(self):
-        return {
-            'body' : '500 Internal Server Error',
-        }
-
-
-    #
-    # Handle Route
-    #
-    def handle_route(self, route):
+        Returns:
+            `Dict[str, str]`: The routes response.
+        """
 
         environment = self.getOption('environment')
         method = environment.get('REQUEST_METHOD')
@@ -140,23 +126,54 @@ class Server(OptionMixin):
         }
 
 
-#
-# Application
-#
-def application(environment, start_response):
-    server = Server()
+    def handle_404(self) -> Dict[str, str]:
+        """Handle 404 not found.
+
+        Returns:
+            `Dict[str, str]`: The 404 response.
+        """
+
+        return {
+            'body' : '404 Not Found',
+        }
+    
+
+    def handle_405(self) -> Dict[str, str]:
+        """Handle 405 method not allowed.
+
+        Returns:
+            `Dict[str, str]`: The 405 response.
+        """
+
+        return {
+            'body' : '405 Method Not Allowed',
+        }
+    
+
+    def handle_500(self) -> Dict[str, str]:
+        """Handle 500 internal server errors.
+
+        Returns:
+            `Dict[str, str]`: The 500 response.
+        """
+
+        return {
+            'body' : '500 Internal Server Error',
+        }
+
+
+def application(environment, start_response) -> List[bytes]:
+
+    server = BaseServer()
 
     server.setOptions({
         'environment'    : environment,
         'start_response' : start_response
     })
 
-    return server.handle_request()
+    return [server.handle_request()]
 
 
-#
-# Initialize Server
-#
 def initialize(**kwargs):
     ConfigTools.load(**kwargs.get('config', {}))
     RouteTools.load()
