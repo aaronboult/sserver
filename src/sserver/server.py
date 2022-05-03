@@ -5,10 +5,6 @@ from sserver.tool.ConfigTools import ConfigTools
 from sserver.tool.RouteTools import RouteTools
 
 
-#
-# Server
-# @note This is never instantiated
-#
 class Server(OptionMixin):
 
 

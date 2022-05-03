@@ -1,2 +1,1 @@
-"""Provides modules to handle file operations
-"""
+"""Provides modules to handle file operations."""

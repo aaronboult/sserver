@@ -1,2 +1,1 @@
-"""Provides modules to handle cryptographic operations
-"""
+"""Provides modules to handle cryptographic operations."""

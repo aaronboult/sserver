@@ -1,2 +1,1 @@
-"""Provides modules to handle logging
-"""
+"""Provides modules to handle logging."""

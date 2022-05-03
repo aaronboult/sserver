@@ -1,6 +1,4 @@
-#
-# Internal Config File For SServer
-#
+"""Internal config file for SServer."""
 
 
 CONFIG_CACHE_KEY = 'sserver.config'
