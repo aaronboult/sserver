@@ -40,11 +40,11 @@ class BaseEndpoint(OptionMixin):
         if not isinstance(template, str):
             raise TypeError('template must be of type str')
 
-        return TemplateTools.load(**{
-            'app_name'      : self.get_app_name(),
-            'template_name' : template,
-            'context'       : context,
-        })
+        return TemplateTools.load(
+            self.get_app_name(),
+            template,
+            context,
+        )
 
 
     def post(self) -> str:
