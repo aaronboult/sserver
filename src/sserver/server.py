@@ -1,13 +1,36 @@
-from typing import Dict, List, Union
-from sserver.log.Logger import Logger
-from sserver.mixin.OptionMixin import OptionMixin
-from sserver.routes import Route
-from sserver.tool.CacheTools import CacheTools
-from sserver.tool.ConfigTools import ConfigTools
-from sserver.tool.RouteTools import RouteTools
+from typing import Callable, Dict, List, Union
+from sserver.mixin.option_mixin import OptionMixin
+from sserver.util.route import Route
+from sserver.util import log
+from sserver.util import cache
 
 
 class BaseServer(OptionMixin):
+
+
+    def __init__(self, environment: Dict[str, str] = None, start_response: Callable = None):
+        """Initialize the server.
+
+        Args:
+            environment (`Dict[str, str]`): The environment dict.
+            start_response (`Callable`): The start_response function.
+        """
+
+        if environment is not None and start_response is not None:
+            super().__init__({
+                'environment' : environment,
+                'start_response' : start_response,
+            })
+
+
+    def __iter__(self):
+        """Get a response from the server.
+
+        Yields:
+            `str`: The server response.
+        """
+
+        yield self.handle_request()
 
 
     def handle_request(self) -> bytes:
@@ -35,7 +58,7 @@ class BaseServer(OptionMixin):
                 content = str(content).encode('utf-8')
 
         except Exception as e:
-            Logger.exception(e, reraise = False)
+            log.exception(e, reraise = False)
 
             # Ensure a response for unexplained errors
             headers = [('Content-Type', 'text/html')]
@@ -58,17 +81,17 @@ class BaseServer(OptionMixin):
         # Wrap entire request handle in try/except to report 500 errors
         try:
 
-            route = self.get_route()
+            matched_route = self.get_route()
 
-            if route == None:
+            if matched_route == None:
                 return self.handle_404()
 
             else:
-                return self.handle_route(route)
+                return self.handle_route(matched_route)
 
         except Exception as e:
 
-            Logger.exception(e)
+            log.exception(e)
 
             return self.handle_500()
 
@@ -84,7 +107,7 @@ class BaseServer(OptionMixin):
 
         uri = environment.get('REQUEST_URI')
 
-        route = CacheTools.get(uri)
+        route = cache.get(uri)
 
         return route
 
@@ -172,8 +195,3 @@ def application(environment, start_response) -> List[bytes]:
     })
 
     return [server.handle_request()]
-
-
-def initialize(**kwargs):
-    ConfigTools.load(**kwargs.get('config', {}))
-    RouteTools.load()

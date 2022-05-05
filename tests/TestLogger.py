@@ -1,7 +1,7 @@
 import unittest
 
-# Package Imports
-from sserver.log.Logger import Logger
+
+from sserver.util import log
 
 
 #
@@ -14,42 +14,42 @@ class LoggerTest(unittest.TestCase):
     # Test Format Int
     #
     def test_format_int(self):
-        self.assertEqual(Logger.format(10), '10')
+        self.assertEqual(log.format(10), '10')
 
 
     #
     # Test Format Float
     #
     def test_format_float(self):
-        self.assertEqual(Logger.format(10.5), '10.5')
+        self.assertEqual(log.format(10.5), '10.5')
 
 
     #
     # Test Format None
     #
     def test_format_none(self):
-        self.assertEqual(Logger.format(None), 'None')
+        self.assertEqual(log.format(None), 'None')
 
 
     #
     # Test Format True
     #
     def test_format_true(self):
-        self.assertEqual(Logger.format(True), 'True')
+        self.assertEqual(log.format(True), 'True')
 
 
     #
     # Test Format False
     #
     def test_format_false(self):
-        self.assertEqual(Logger.format(False), 'False')
+        self.assertEqual(log.format(False), 'False')
 
 
     #
     # Test Format String
     #
     def test_format_str(self):
-        self.assertEqual(Logger.format('test'), '"test"')
+        self.assertEqual(log.format('test'), '"test"')
 
 
     #
@@ -68,7 +68,7 @@ class LoggerTest(unittest.TestCase):
 \t"l3",
 ]'''
 
-        self.assertEqual(Logger.format_list(lst), expected)
+        self.assertEqual(log.format_list(lst), expected)
 
 
     #
@@ -87,7 +87,7 @@ class LoggerTest(unittest.TestCase):
 \t"t3",
 )'''
 
-        self.assertEqual(Logger.format_tuple(tpl), expected)
+        self.assertEqual(log.format_tuple(tpl), expected)
 
 
     #
@@ -119,7 +119,7 @@ class LoggerTest(unittest.TestCase):
                     if i != j and i != k and j != k:
                         expected_posibilities.append('{\n' + unordered_lines[i] + ',\n' + unordered_lines[j] + ',\n' + unordered_lines[k] + ',\n}')
 
-        self.assertIn(Logger.format_set(st), expected_posibilities)
+        self.assertIn(log.format_set(st), expected_posibilities)
 
 
     #
@@ -157,7 +157,7 @@ class LoggerTest(unittest.TestCase):
 \t},
 }'''
 
-        self.assertEqual(Logger.format_dict(dct), expected)
+        self.assertEqual(log.format_dict(dct), expected)
 
 if __name__ == '__main__':
     unittest.main()

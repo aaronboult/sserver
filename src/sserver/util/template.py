@@ -1,7 +1,7 @@
 from typing import Any, Dict, Union
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
-from sserver.log.Logger import Logger
-from sserver.tool.ConfigTools import ConfigTools
+from sserver.util import log
+from sserver.util import config
 
 
 class TemplateTools:
@@ -21,8 +21,8 @@ class TemplateTools:
             `Template` | `None`: The template object, or None if not found.
         """
 
-        APP_FOLDER = ConfigTools.fetch('app_folder')
-        TEMPLATE_FOLDER = ConfigTools.fetch('template_folder', app_name = app_name)
+        APP_FOLDER = config.fetch('app_folder')
+        TEMPLATE_FOLDER = config.fetch('template_folder', app_name = app_name)
         TEMPLATE_FOLDER_PATH = f'{APP_FOLDER}.{app_name}'
 
         try:
@@ -34,7 +34,7 @@ class TemplateTools:
             return environment.get_template(template_name)
 
         except Exception as exception:
-            Logger.exception(exception)
+            log.exception(exception)
 
         return None
 

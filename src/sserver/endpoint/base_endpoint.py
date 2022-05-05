@@ -1,8 +1,8 @@
 from typing import Any, Dict, Union
-from sserver.mixin.OptionMixin import OptionMixin
-from sserver.tool.ConfigTools import ConfigTools
-from sserver.tool.ModuleTools import ModuleTools
-from sserver.tool.TemplateTools import TemplateTools
+from sserver.mixin.option_mixin import OptionMixin
+from sserver.util import config
+from sserver.util import module
+from sserver.util.template import TemplateTools
 
 
 class BaseEndpoint(OptionMixin):
@@ -113,7 +113,7 @@ class BaseEndpoint(OptionMixin):
             `str`: The app name.
         """
 
-        return ModuleTools.get_app_name(self.__module__)
+        return module.get_app_name(self.__module__)
 
 
     def get_config(self) -> Dict[str, Union[str, int, float, bool, None]]:
@@ -127,7 +127,7 @@ class BaseEndpoint(OptionMixin):
             { 'strkey' : 'string', 'intkey' : 10, 'floatkey' : 10.5, 'boolkey' : True, 'emptykey' : None }
         """
 
-        return ConfigTools.fetch_app(self.get_app_name())
+        return config.fetch_app(self.get_app_name())
 
 
     def get_from_config(self, *key_list: str, default: Any = None) -> Union[str, int, float, bool, None]:
@@ -168,4 +168,4 @@ class BaseEndpoint(OptionMixin):
             'Hello'
         """
 
-        return ConfigTools.nested_fetch(*key_list, default = default, app_name = self.get_app_name())
+        return config.nested_fetch(*key_list, default = default, app_name = self.get_app_name())
