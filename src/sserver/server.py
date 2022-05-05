@@ -1,8 +1,9 @@
 from typing import Callable, Dict, List, Union
 from sserver.mixin.option_mixin import OptionMixin
-from sserver.endpoint.route import Route
+from sserver.endpoint import route
 from sserver.util import log
 from sserver.util import cache
+from sserver.util import config
 
 
 class BaseServer(OptionMixin):
@@ -96,7 +97,7 @@ class BaseServer(OptionMixin):
             return self.handle_500()
 
 
-    def get_route(self) -> Union[Route, None]:
+    def get_route(self) -> Union[route.Route, None]:
         """Get the matching route, if any, using the REQUEST_URI.
 
         Returns:
@@ -107,16 +108,16 @@ class BaseServer(OptionMixin):
 
         uri = environment.get('REQUEST_URI')
 
-        route = cache.get(uri)
+        matched_route = cache.get(uri)
 
-        return route
+        return matched_route
 
 
-    def handle_route(self, route: Route) -> Dict[str, str]:
-        """Handle the request using the matched `route`.
+    def handle_route(self, matched_route: route.Route) -> Dict[str, str]:
+        """Handle the request using the matched `matched_route`.
 
         Args:
-            route (`Route`): The matched route.
+            matched_route (`Route`): The matched route.
 
         Returns:
             `Dict[str, str]`: The routes response.
@@ -127,19 +128,19 @@ class BaseServer(OptionMixin):
         content = None
 
         if method == 'GET':
-            content = route.endpoint().get()
+            content = matched_route.endpoint().get()
 
         elif method == 'POST':
-            content = route.endpoint().post()
+            content = matched_route.endpoint().post()
 
         elif method == 'PUT':
-            content = route.endpoint().put()
+            content = matched_route.endpoint().put()
 
         elif method == 'PATCH':
-            content = route.endpoint().patch()
+            content = matched_route.endpoint().patch()
 
         elif method == 'DELETE':
-            content = route.endpoint().delete()
+            content = matched_route.endpoint().delete()
 
         else:
             return self.handle_405()
@@ -195,3 +196,6 @@ def application(environment, start_response) -> List[bytes]:
     })
 
     return [server.handle_request()]
+
+config.load()
+route.load()

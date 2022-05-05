@@ -4,58 +4,49 @@ import unittest
 from sserver.util import log
 
 
-#
-# Logger Tests
-#
 class LoggerTest(unittest.TestCase):
+    """Unittest the sserver.util.log module."""
 
 
-    #
-    # Test Format Int
-    #
     def test_format_int(self):
+        """Test sserver.util.log.format_int."""
+
         self.assertEqual(log.format(10), '10')
 
 
-    #
-    # Test Format Float
-    #
     def test_format_float(self):
+        """Test sserver.util.log.format_float."""
+
         self.assertEqual(log.format(10.5), '10.5')
 
 
-    #
-    # Test Format None
-    #
     def test_format_none(self):
+        """Test sserver.util.log.format, passing None."""
+
         self.assertEqual(log.format(None), 'None')
 
 
-    #
-    # Test Format True
-    #
     def test_format_true(self):
+        """Test sserver.util.log.format, passing True."""
+
         self.assertEqual(log.format(True), 'True')
 
 
-    #
-    # Test Format False
-    #
     def test_format_false(self):
+        """Test sserver.util.log.format, passing False."""
+
         self.assertEqual(log.format(False), 'False')
 
 
-    #
-    # Test Format String
-    #
     def test_format_str(self):
+        """Test sserver.util.log.format, passing a string."""
+
         self.assertEqual(log.format('test'), '"test"')
 
 
-    #
-    # Test Format List
-    #
     def test_format_list(self):
+        """Test sserver.util.log.format_list."""
+
         lst = [
             'l1',
             'l2',
@@ -71,10 +62,9 @@ class LoggerTest(unittest.TestCase):
         self.assertEqual(log.format_list(lst), expected)
 
 
-    #
-    # Test Format Tuple
-    #
     def test_format_tuple(self):
+        """Test sserver.util.log.format_tuple."""
+
         tpl = (
             't1',
             't2',
@@ -90,10 +80,9 @@ class LoggerTest(unittest.TestCase):
         self.assertEqual(log.format_tuple(tpl), expected)
 
 
-    #
-    # Test Format Set
-    #
     def test_format_set(self):
+        """Test sserver.util.log.format_set."""
+
         # The order of the items in the set is not guaranteed, so multiple expected
 
         st = {
@@ -122,10 +111,8 @@ class LoggerTest(unittest.TestCase):
         self.assertIn(log.format_set(st), expected_posibilities)
 
 
-    #
-    # Test Format Dict
-    #
     def test_format_dict(self):
+        """Test sserver.util.log.format_dict."""
         
         dct = {
             'k1' : 'v1',
@@ -158,6 +145,3 @@ class LoggerTest(unittest.TestCase):
 }'''
 
         self.assertEqual(log.format_dict(dct), expected)
-
-if __name__ == '__main__':
-    unittest.main()

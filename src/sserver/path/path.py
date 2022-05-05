@@ -5,8 +5,6 @@ environment.
 """
 
 import os
-from os import walk, getcwd
-from os.path import join, basename
 import sys
 from typing import List, Union
 
@@ -25,9 +23,9 @@ def get_path_to_parent(parent_folder: str) -> Union[str, None]:
             `parent_folder` or None if not found.
     """
 
-    for root, dirs, files in walk(getcwd()):
+    for root, dirs, files in os.walk(os.getcwd()):
         if parent_folder in dirs:
-            return join(root, parent_folder)
+            return os.path.join(root, parent_folder)
     
     return None
 
@@ -42,7 +40,14 @@ def get_directory_list(directory: str) -> List[str]:
         `List[str]`: The list of directories.
     """
 
-    return next(walk(directory))[1]
+    if os.path.exists(directory):
+        return [
+            os.join(directory, d)
+            for d in os.listdir(directory)
+            if os.path.isdir(os.join(directory, d))
+        ]
+
+    return []
 
 
 def get_path_list_to_file(filename: str, base_path: str = sys.path[0], folder_list: str = None, include_parent_folder: bool = False) -> List[str]:
@@ -79,14 +84,14 @@ def get_path_list_to_file(filename: str, base_path: str = sys.path[0], folder_li
 
         return path_list
 
-    parent_dir = basename(getcwd())
+    parent_dir = os.basename(os.getcwd())
 
-    for root, dirs, files in walk(base_path):
+    for root, dirs, files in os.walk(base_path):
         if filename in files:
             if include_parent_folder:
-                path_list.append(join(parent_dir, root, filename))
+                path_list.append(os.path.join(parent_dir, root, filename))
 
             else:
-                path_list.append(join(root, filename))
+                path_list.append(os.path.join(root, filename))
 
     return path_list
