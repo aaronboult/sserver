@@ -4,15 +4,33 @@ from configparser import ConfigParser
 import os
 import sys
 from typing import Any, Dict, Union
-from sserver.config import (
-    CONFIG_CACHE_KEY,
-    SSERVER_CONFIG,
-    PROJECT_DEFAULT_CONFIG,
-    APP_DEFAULT_CONFIG,
-)
 from sserver.util import log
 from sserver.util import cache
 from sserver.path import path
+
+
+# Default sserver config
+__CONFIG_CACHE_KEY = 'sserver.config'
+
+
+# Idealy this should remain empty, providing maximum configuration to the
+# developer
+__SSERVER_CONFIG = {
+}
+
+
+__PROJECT_DEFAULT_CONFIG = {
+    'app_folder'                 : 'apps',
+    'cache_host'                 : 'localhost',
+    'cache_port'                 : 6379,
+    'cache_decode_strings'       : True,
+    'prefix_route_with_app_name' : True,
+}
+
+
+__APP_DEFAULT_CONFIG = {
+    'template_folder' : 'templates',
+}
 
 
 def clear():
@@ -53,7 +71,7 @@ def load(filename: str = 'config.ini', include_default_config: bool = True):
 
 
     config = {
-        '__sserver__' : SSERVER_CONFIG,
+        '__sserver__' : __SSERVER_CONFIG,
     }
     config_package_manifest = []
 
@@ -71,7 +89,7 @@ def load(filename: str = 'config.ini', include_default_config: bool = True):
     PROJECT_CONFIG = {}
 
     if include_default_config:
-        PROJECT_CONFIG = PROJECT_DEFAULT_CONFIG
+        PROJECT_CONFIG = __PROJECT_DEFAULT_CONFIG
 
     if 'project' in evalutated_config:
 
@@ -107,7 +125,7 @@ def load(filename: str = 'config.ini', include_default_config: bool = True):
             config[APP] = {}
 
             if include_default_config:
-                config[APP] = APP_DEFAULT_CONFIG
+                config[APP] = __APP_DEFAULT_CONFIG
 
             config[APP] = {
                 **config[APP],
@@ -130,8 +148,8 @@ def load(filename: str = 'config.ini', include_default_config: bool = True):
     )
 
     cache.set(key_value = {
-        CONFIG_CACHE_KEY : config,
-        f'{CONFIG_CACHE_KEY}_package_manifest' : config_package_manifest
+        __CONFIG_CACHE_KEY : config,
+        f'{__CONFIG_CACHE_KEY}_package_manifest' : config_package_manifest
     })
 
 
@@ -280,4 +298,4 @@ def fetch_app(app_name: str) -> Dict[Any, Union[str, int, float, bool]]:
     if not isinstance(app_name, str):
         raise TypeError('app_name must be of type str')
 
-    return cache.get(CONFIG_CACHE_KEY).get(app_name)
+    return cache.get(__CONFIG_CACHE_KEY).get(app_name)

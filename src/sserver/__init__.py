@@ -1,5 +1,5 @@
 from sserver.util import config
-from sserver.util import route
+from sserver.endpoint import route
 
 config.load()
 route.load()

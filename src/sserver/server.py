@@ -1,6 +1,6 @@
 from typing import Callable, Dict, List, Union
 from sserver.mixin.option_mixin import OptionMixin
-from sserver.util.route import Route
+from sserver.endpoint.route import Route
 from sserver.util import log
 from sserver.util import cache
 

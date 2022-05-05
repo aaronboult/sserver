@@ -1,5 +1,6 @@
 """Handles URL routing."""
 
+from typing import Any
 from sserver.endpoint.base_endpoint import BaseEndpoint
 from sserver.util import log
 from sserver.util import config
@@ -29,6 +30,21 @@ class Route:
 
     def __str__(self):
         return f'<{self.__class__.__name__} url="{self.url}">'
+
+
+def check_route_valid(route: Any) -> bool:
+    if isinstance(route, Route):
+        return True
+
+    if hasattr(route, 'url') and hasattr(route, 'name') and hasattr(route, 'endpoint'):
+        return True
+
+    if hasattr(route, '__get__'):
+        if hasattr(route.__get__, '__call__'):
+            # check get for url, name and endpoint
+            return False
+
+    return False
 
 
 def route(url: str, name: str, endpoint: BaseEndpoint) -> Route:
