@@ -1,14 +1,36 @@
-from typing import Dict, List, Union
-from sserver.log.Logger import Logger
-from sserver.mixin.OptionMixin import OptionMixin
-from sserver.routes import Route
-from sserver.tool.CacheTools import CacheTools
-from sserver.tool.ConfigTools import ConfigTools
-from sserver.tool.RouteTools import RouteTools
+from typing import Callable, Dict, List, Union
+from sserver.mixin.option_mixin import OptionMixin
+from sserver.endpoint import route
+from sserver.util import log
+from sserver.util import cache
+from sserver.util import config
 
 
 class BaseServer(OptionMixin):
 
+    def __init__(self, environment: Dict[str, str] = None,
+                 start_response: Callable = None):
+        """Initialize the server.
+
+        Args:
+            environment (`Dict[str, str]`): The environment dict.
+            start_response (`Callable`): The start_response function.
+        """
+
+        if environment is not None and start_response is not None:
+            super().__init__({
+                'environment': environment,
+                'start_response': start_response,
+            })
+
+    def __iter__(self):
+        """Get a response from the server.
+
+        Yields:
+            `str`: The server response.
+        """
+
+        yield self.handle_request()
 
     def handle_request(self) -> bytes:
         """Handle a WSGI request.
@@ -20,11 +42,12 @@ class BaseServer(OptionMixin):
         status, headers, content = None, None, None
 
         try:
-        
+
             response = self.get_response()
 
             # Default headers and status to an OK HTML response
-            headers = response.get('headers', [('Content-Type', 'text/html')])
+            headers = response.get('headers',
+                                   [('Content-Type', 'text/html')])
 
             # Get status and ensure it is bytes
             status = response.get('status', '200 OK')
@@ -35,7 +58,7 @@ class BaseServer(OptionMixin):
                 content = str(content).encode('utf-8')
 
         except Exception as e:
-            Logger.exception(e, reraise = False)
+            log.exception(e, reraise=False)
 
             # Ensure a response for unexplained errors
             headers = [('Content-Type', 'text/html')]
@@ -47,7 +70,6 @@ class BaseServer(OptionMixin):
 
         return content
 
-
     def get_response(self) -> Dict[str, str]:
         """Get the requests response.
 
@@ -58,22 +80,21 @@ class BaseServer(OptionMixin):
         # Wrap entire request handle in try/except to report 500 errors
         try:
 
-            route = self.get_route()
+            matched_route = self.get_route()
 
-            if route == None:
+            if matched_route is None:
                 return self.handle_404()
 
             else:
-                return self.handle_route(route)
+                return self.handle_route(matched_route)
 
         except Exception as e:
 
-            Logger.exception(e)
+            log.exception(e)
 
             return self.handle_500()
 
-
-    def get_route(self) -> Union[Route, None]:
+    def get_route(self) -> Union[route.Route, None]:
         """Get the matching route, if any, using the REQUEST_URI.
 
         Returns:
@@ -84,16 +105,15 @@ class BaseServer(OptionMixin):
 
         uri = environment.get('REQUEST_URI')
 
-        route = CacheTools.get(uri)
+        matched_route = cache.get(uri)
 
-        return route
+        return matched_route
 
-
-    def handle_route(self, route: Route) -> Dict[str, str]:
-        """Handle the request using the matched `route`.
+    def handle_route(self, matched_route: route.Route) -> Dict[str, str]:
+        """Handle the request using the matched `matched_route`.
 
         Args:
-            route (`Route`): The matched route.
+            matched_route (`Route`): The matched route.
 
         Returns:
             `Dict[str, str]`: The routes response.
@@ -103,28 +123,24 @@ class BaseServer(OptionMixin):
         method = environment.get('REQUEST_METHOD')
         content = None
 
-        if method == 'GET':
-            content = route.endpoint().get()
+        endpoint = matched_route.endpoint()
 
-        elif method == 'POST':
-            content = route.endpoint().post()
+        method_map = {
+            'GET': endpoint.get,
+            'POST': endpoint.post,
+            'PUT': endpoint.put,
+            'DELETE': endpoint.delete,
+        }
 
-        elif method == 'PUT':
-            content = route.endpoint().put()
-
-        elif method == 'PATCH':
-            content = route.endpoint().patch()
-
-        elif method == 'DELETE':
-            content = route.endpoint().delete()
+        if method in method_map:
+            content = method_map[method]()
 
         else:
             return self.handle_405()
 
         return {
-            'body' : content,
+            'body': content,
         }
-
 
     def handle_404(self) -> Dict[str, str]:
         """Handle 404 not found.
@@ -134,9 +150,8 @@ class BaseServer(OptionMixin):
         """
 
         return {
-            'body' : '404 Not Found',
+            'body': '404 Not Found',
         }
-    
 
     def handle_405(self) -> Dict[str, str]:
         """Handle 405 method not allowed.
@@ -146,9 +161,8 @@ class BaseServer(OptionMixin):
         """
 
         return {
-            'body' : '405 Method Not Allowed',
+            'body': '405 Method Not Allowed',
         }
-    
 
     def handle_500(self) -> Dict[str, str]:
         """Handle 500 internal server errors.
@@ -158,7 +172,7 @@ class BaseServer(OptionMixin):
         """
 
         return {
-            'body' : '500 Internal Server Error',
+            'body': '500 Internal Server Error',
         }
 
 
@@ -167,13 +181,12 @@ def application(environment, start_response) -> List[bytes]:
     server = BaseServer()
 
     server.setOptions({
-        'environment'    : environment,
-        'start_response' : start_response
+        'environment': environment,
+        'start_response': start_response
     })
 
     return [server.handle_request()]
 
 
-def initialize(**kwargs):
-    ConfigTools.load(**kwargs.get('config', {}))
-    RouteTools.load()
+config.load()
+route.load()

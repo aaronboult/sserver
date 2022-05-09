@@ -4,7 +4,6 @@ from typing import Any, Dict
 class OptionMixin:
     """A mixin giving classes assigned options."""
 
-
     def __init__(self, options: Dict[Any, Any] = None):
         """Pass options in the class constructor.
 
@@ -18,7 +17,6 @@ class OptionMixin:
         if options is not None:
             self.setOptions(options)
 
-
     def setOptions(self, options: Dict[Any, Any]):
         """Set the class options.
 
@@ -28,7 +26,6 @@ class OptionMixin:
 
         self._options = options
 
-
     def getOptions(self) -> Dict[Any, Any]:
         """Get the class options.
 
@@ -37,7 +34,6 @@ class OptionMixin:
         """
 
         return self._options
-
 
     def setOption(self, key: str, value: Any):
         """Set the option with key `key` to `value`.
@@ -49,12 +45,6 @@ class OptionMixin:
 
         self._options[key] = value
 
-
-    #
-    # Get Option
-    # @param str key The key of the option to get
-    # @returns mixed The value of the option
-    #
     def getOption(self, key: str, default: Any = None) -> Any:
         """Get the value of option `key`, if not found
         return `default`.
