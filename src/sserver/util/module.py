@@ -8,7 +8,8 @@ import importlib
 from sserver.util.exception import MissingConfigValueException
 
 
-def load_from_filename(filename: str, package: str = None, folder_list: List[str] = None) -> List[ModuleType]:
+def load_from_filename(filename: str, package: str = None,
+                       folder_list: List[str] = None) -> List[ModuleType]:
     """Load modules where the filename is `filename` inside package
     `package` searching only in folders `folder_list`, if set.
 
@@ -32,16 +33,24 @@ def load_from_filename(filename: str, package: str = None, folder_list: List[str
 
     modules = []
 
-    file_path_list = path.get_path_list_to_file(filename, folder_list = folder_list)
+    file_path_list = path.get_path_list_to_file(filename,
+                                                folder_list=folder_list)
 
     for file_path in file_path_list:
-        import_string = file_path.replace('./', '').replace('.py', '').replace('/', '.')
-        modules.append(load_module(import_string, package = package))
+        import_string = file_path.replace('./', '') \
+                                .replace('.py', '') \
+                                .replace('/', '.')
+
+        loaded_module = load_module(import_string, package=package,
+                                    suppress_errors=False)
+
+        modules.append(loaded_module)
 
     return modules
 
 
-def load_module(module_path: str, package: str = None, suppress_errors: bool = True) -> ModuleType:
+def load_module(module_path: str, package: str = None,
+                suppress_errors: bool = True) -> ModuleType:
     """Load a module at `module_path` in `package`.
 
     Args:
@@ -57,8 +66,7 @@ def load_module(module_path: str, package: str = None, suppress_errors: bool = T
     Returns:
         `ModuleType`: The loaded module.
     """
-
-    if package == None:
+    if package is None:
         package = sys.path[0]
 
     try:
@@ -89,7 +97,9 @@ def get_from_module(module: ModuleType, key: str, default: Any = None) -> Any:
     return default
 
 
-def get_all_from_module(module: ModuleType, include_builtins: bool = False, force_include_keys: List[str] = None) -> Dict[Any, Any]:
+def get_all_from_module(module: ModuleType, include_builtins: bool = False,
+                        force_include_keys: List[str] = None
+                        ) -> Dict[Any, Any]:
     """Get all attributes from `module`.
 
     Args:
@@ -100,7 +110,7 @@ def get_all_from_module(module: ModuleType, include_builtins: bool = False, forc
             even if excluded by `include_builtins`. Defaults to None.
 
     Note:
-        When `include_builtins` is False, the following builtins are excluded:
+        When `include_builtins` is False the following builtins are excluded:
         - `__builtins__`
         - `__cached__`
         - `__doc__`
@@ -117,13 +127,13 @@ def get_all_from_module(module: ModuleType, include_builtins: bool = False, forc
         `Dict[Any, Any]`: The module attributes.
     """
 
-    if force_include_keys == None:
+    if force_include_keys is None:
         force_include_keys = []
 
     if not isinstance(force_include_keys, list):
         raise TypeError('force_include_keys must be of type list')
 
-    # Use this method over startswith(__) to allow custom module values with __
+    # Use list instead of startswith to only target builtins
     builtin_keys = [
         '__builtins__',
         '__cached__',
@@ -164,7 +174,7 @@ def get_app_name(module_path: str) -> str:
     """
 
     # Get apps folder
-    APP_FOLDER = config.fetch('app_folder')
+    APP_FOLDER = config.get('app_folder')
 
     if APP_FOLDER is None:
         raise MissingConfigValueException('app_folder not set in config')

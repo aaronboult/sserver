@@ -20,16 +20,16 @@ __SSERVER_CONFIG = {
 
 
 __PROJECT_DEFAULT_CONFIG = {
-    'app_folder'                 : 'apps',
-    'cache_host'                 : 'localhost',
-    'cache_port'                 : 6379,
-    'cache_decode_strings'       : True,
-    'prefix_route_with_app_name' : True,
+    'app_folder': 'apps',
+    'cache_host': 'localhost',
+    'cache_port': 6379,
+    'cache_string_decode ': True,
+    'prefix_route_with_app_name': True,
 }
 
 
 __APP_DEFAULT_CONFIG = {
-    'template_folder' : 'templates',
+    'template_folder': 'templates',
 }
 
 
@@ -59,22 +59,20 @@ def load(filename: str = 'config.ini', include_default_config: bool = True):
         raise TypeError('config_filename must be of type str')
 
     if not isinstance(include_default_config, bool):
-        raise TypeError('include_sserver_default_config must be of type bool')
+        error_message = 'include_sserver_default_config must be of type bool'
 
+        raise TypeError(error_message)
 
     # Clear cache if cache tools initialized
     if cache.Cache.is_ready():
         clear()
 
-
     log.info('Loading config...')
 
-
     config = {
-        '__sserver__' : __SSERVER_CONFIG,
+        '__sserver__': __SSERVER_CONFIG,
     }
     config_package_manifest = []
-
 
     # Get project config
     config_parser = ConfigParser()
@@ -101,7 +99,6 @@ def load(filename: str = 'config.ini', include_default_config: bool = True):
     # Add project config to config
     config['__project__'] = PROJECT_CONFIG
 
-
     # Get paths to app configs
     APP_FOLDER = PROJECT_CONFIG.get('app_folder')
 
@@ -114,46 +111,51 @@ def load(filename: str = 'config.ini', include_default_config: bool = True):
     # Load configs from each app
     for APP in APP_DIRECTORY_LIST:
         if APP != '__pycache__':
-            APP_CONFIG_PATH = os.path.join(APP_DIRECTORY_PATH, APP, filename)
 
-            # Get app config
-            config_parser.read(APP_CONFIG_PATH)
-
-            evalutated_config = get_evaluated_config_as_dict(config_parser)
-
-            # Load app config
             config[APP] = {}
 
             if include_default_config:
                 config[APP] = __APP_DEFAULT_CONFIG
 
-            config[APP] = {
-                **config[APP],
-                **evalutated_config
-            }
+            APP_CONFIG_PATH = os.path.join(APP_DIRECTORY_PATH, APP, filename)
+
+            if os.path.isfile(APP_CONFIG_PATH):
+                # Get app config
+                config_parser.read(APP_CONFIG_PATH)
+
+                evalutated_config = get_evaluated_config_as_dict(
+                    config_parser
+                )
+
+                config[APP] = {
+                    **config[APP],
+                    **evalutated_config
+                }
+
+            log.log('app', APP)
+            log.log('loaded', config[APP])
 
             # Add app to package manifest
             config_package_manifest.append(APP)
 
-
     log.info('Loaded Configs', config)
     log.info('Loaded Package Manifest', config_package_manifest)
 
-
     # Initialize cache before accessing
     cache.initialize(
-        host = PROJECT_CONFIG.get('cache_host'),
-        port = PROJECT_CONFIG.get('cache_port'),
-        decode_strings = PROJECT_CONFIG.get('cache_decode_strings'),
+        host=PROJECT_CONFIG.get('cache_host'),
+        port=PROJECT_CONFIG.get('cache_port'),
+        string_decode=PROJECT_CONFIG.get('cache_string_decode'),
     )
 
-    cache.set(key_value = {
-        __CONFIG_CACHE_KEY : config,
-        f'{__CONFIG_CACHE_KEY}_package_manifest' : config_package_manifest
+    cache.set(key_value={
+        __CONFIG_CACHE_KEY: config,
+        f'{__CONFIG_CACHE_KEY}_package_manifest': config_package_manifest
     })
 
 
-def get_evaluated_config_as_dict(config_parser: ConfigParser) -> Dict[Any, Union[str, int, float, bool]]:
+def get_evaluated_config_as_dict(config_parser: ConfigParser
+                                 ) -> Dict[Any, Union[str, int, float, bool]]:
     """Evaluate the dict in `config_parser`.
 
     Args:
@@ -178,7 +180,8 @@ def get_evaluated_config_as_dict(config_parser: ConfigParser) -> Dict[Any, Union
     return evaluated_dict
 
 
-def evaluate_config_value(config_parser: ConfigParser, section: str, key: str) -> Union[str, int, float, bool]:
+def evaluate_config_value(config_parser: ConfigParser, section: str, key: str
+                          ) -> Union[str, int, float, bool]:
     """Evaluate config value in `section` with key `key`.
 
     Args:
@@ -218,12 +221,13 @@ def evaluate_config_value(config_parser: ConfigParser, section: str, key: str) -
     return value
 
 
-def fetch(key: str, app_name: str = '__project__') -> Union[str, int, float, bool]:
-    """Fetch the value at `key` from app `app_name`.
+def get(key: str, app_name: str = '__project__'
+        ) -> Union[str, int, float, bool]:
+    """Get the value at `key` from app `app_name`.
 
     Args:
-        key (`str`): The key to fetch the value from.
-        app_name (`str`, optional): The app name to fetch from. Defaults
+        key (`str`): The key to get the value from.
+        app_name (`str`, optional): The app name to get from. Defaults
             to '__project__'.
 
     Raises:
@@ -236,7 +240,7 @@ def fetch(key: str, app_name: str = '__project__') -> Union[str, int, float, boo
     if not isinstance(key, str):
         raise TypeError('key must be of type str')
 
-    app_config = fetch_app(app_name)
+    app_config = get_app_config(app_name)
 
     if app_config is None:
         return None
@@ -244,13 +248,16 @@ def fetch(key: str, app_name: str = '__project__') -> Union[str, int, float, boo
     return app_config.get(key)
 
 
-def nested_fetch(*key_list: str, default: Any = None, app_name: str = '__project__') -> Union[str, int, float, bool, None]:
-    """Fetch a value, descending down the config tree by iterating over `key_list`.
+def nested_get(*key_list: str, default: Any = None,
+               app_name: str = '__project__'
+               ) -> Union[str, int, float, bool, None]:
+    """Get a value, descending down the config tree by iterating over
+    `key_list`.
 
     Args:
         default (`Any`, optional): The value to return if no config value
             is found. Defaults to None.
-        app_name (`str`, optional): The app name to fetch the config
+        app_name (`str`, optional): The app name to get the config
             value from. Defaults to '__project__'.
 
     Returns:
@@ -261,10 +268,10 @@ def nested_fetch(*key_list: str, default: Any = None, app_name: str = '__project
     value = None
 
     if len(key_list) > 0:
-        # Fetch the first key in the tree
-        node = fetch(key_list[0], app_name)
+        # Get the first key in the tree
+        node = get(key_list[0], app_name)
 
-        # Go down the tree fetching keys
+        # Go down the tree getting keys
         tree_complete = True
         key_list = key_list[1:]
         for key in key_list:
@@ -280,11 +287,12 @@ def nested_fetch(*key_list: str, default: Any = None, app_name: str = '__project
     return default if value is None else value
 
 
-def fetch_app(app_name: str) -> Dict[Any, Union[str, int, float, bool]]:
-    """Fetch the config for app with name `app_name`.
+def get_app_config(app_name: str
+                   ) -> Dict[Any, Union[str, int, float, bool]]:
+    """Get the config for app with name `app_name`.
 
     Args:
-        app_name (`str`): The name of the app to fetch the config from.
+        app_name (`str`): The name of the app to get the config from.
 
     Raises:
         TypeError: If the `app_name` is not a string.

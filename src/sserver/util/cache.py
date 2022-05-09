@@ -14,9 +14,7 @@ from functools import wraps
 class Cache:
     """A wrapper class for the cache."""
 
-
     __cache_instance: Redis = None
-
 
     @classmethod
     def get_cache_instance(cls) -> Redis:
@@ -30,10 +28,11 @@ class Cache:
         """
 
         if not cls.is_ready():
-            raise CacheNotInitializedException('Cache must be initialized before use')
+            error_message = 'Cache must be initialized before use'
+
+            raise CacheNotInitializedException(error_message)
 
         return cls.__cache_instance
-
 
     @classmethod
     def set_cache_instance(cls, cache_instance: Redis):
@@ -47,10 +46,11 @@ class Cache:
         """
 
         if cls.is_ready():
-            raise CacheAlreadyInitializedException('The cache instance is already set')
+            error_message = 'The cache instance is already set'
+
+            raise CacheAlreadyInitializedException(error_message)
 
         cls.__cache_instance = cache_instance
-
 
     @classmethod
     def is_ready(cls) -> bool:
@@ -77,9 +77,10 @@ def requires_lock(func: Callable) -> Callable:
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any):
         return func(*args, **kwargs)
+        # from redis docs:
         # try:
         #     with r.lock('my-lock-key', blocking_timeout=5) as lock:
-        #         # code you want executed only after the lock has been acquired
+        #         # code you want executed after the lock has been acquired
         #         pass
         # except redis.LockError:
         #     # the lock wasn't acquired
@@ -88,13 +89,13 @@ def requires_lock(func: Callable) -> Callable:
     return wrapper
 
 
-def initialize(host: str, port: int, decode_strings: bool = True, db: int = 0):
+def initialize(host: str, port: int, string_decode: bool = True, db: int = 0):
     """Initialize the cache.
 
     Args:
         host (`str`): The cache hostname.
         port (`int`): The cache port.
-        decode_strings (`bool`, optional): Whether or not to decode
+        string_decode (`bool`, optional): Whether or not to decode
             strings by default. Defaults to True.
         db (`int`, optional): The database number. Defaults to 0.
 
@@ -106,11 +107,11 @@ def initialize(host: str, port: int, decode_strings: bool = True, db: int = 0):
         raise CacheAlreadyInitializedException('Cache already initialized')
 
     cache_instance = Redis(
-        host = host,
-        port = port,
-        db = db,
+        host=host,
+        port=port,
+        db=db,
         # This causes errors
-        # decode_responses = decode_strings,
+        # decode_responses=string_decode,
     )
 
     Cache.set_cache_instance(cache_instance)
@@ -136,7 +137,7 @@ def pop(key: str, default: Any = None) -> Any:
         `Any`: The value from the cache, or `default` if not found.
     """
 
-    value = get(key, default = default)
+    value = get(key, default=default)
 
     delete(key)
 
@@ -144,13 +145,14 @@ def pop(key: str, default: Any = None) -> Any:
 
 
 @requires_lock
-def get(*key_list: str, default: Union[Any, List[Any]] = None) -> Union[Any, List[Any]]:
+def get(*key_list: str,
+        default: Union[Any, List[Any]] = None) -> Union[Any, List[Any]]:
     """Get values from the cache.
 
     Args:
         *key_list (`str`): The list of keys to get.
-        default (`Any` | `List[Any]`, optional): The default value or list of values.
-            Defaults to None.
+        default (`Any` | `List[Any]`, optional): The default value or list of
+            values. Defaults to None.
 
     Returns:
         `Any` | `List[Any]`: The values from the cache, or single value
@@ -167,7 +169,10 @@ def get(*key_list: str, default: Union[Any, List[Any]] = None) -> Union[Any, Lis
 
         # Ensure default list is at least as long as key list
         if KEY_LIST_LENGTH > DEFAULT_LENGTH:
-            default.extend(None for _ in range(KEY_LIST_LENGTH - DEFAULT_LENGTH))
+            default.extend(
+                None
+                for _ in range(KEY_LIST_LENGTH - DEFAULT_LENGTH)
+            )
 
     # Convert each key into a tuple to allow passing with *
     key_list = list(zip(key_list, default))
@@ -206,7 +211,8 @@ def _get(key: str, default: Any = None) -> Any:
 
 
 @requires_lock
-def set(key: str = None, value: Any = None, key_value: Dict[str, Any] = None):
+def set(key: str = None, value: Any = None,
+        key_value: Dict[str, Any] = None):
     """Set the key `key` to value `value` in the cache, or store the same
     key-value mappings in `key_value` in the cache.
 
@@ -226,7 +232,12 @@ def set(key: str = None, value: Any = None, key_value: Dict[str, Any] = None):
         return
 
     elif not isinstance(key, str):
-        raise TypeError(f'Cache key must be of type str, value : {str(value)}')
+        error_message = (
+            'Cache key must be of type str, value ',
+            f': {str(value)}',
+        )
+
+        raise TypeError(''.join(error_message))
 
     Cache.get_cache_instance().set(key, serialize(value))
 

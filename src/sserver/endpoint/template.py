@@ -4,26 +4,26 @@ from sserver.util import log
 from sserver.util import config
 
 
-def fetch(app_name: str, template_name: str) -> Union[Template, None]:
-    """Fetch a template from `app_name` with name
+def get(app_name: str, template_name: str) -> Union[Template, None]:
+    """Get a template from `app_name` with name
     `template_name`.
 
     Args:
-        app_name (`str`): The name of the app to fetch from.
-        template_name (`str`): The name of the template to fetch.
+        app_name (`str`): The name of the app to get from.
+        template_name (`str`): The name of the template to get.
 
     Returns:
         `Template` | `None`: The template object, or None if not found.
     """
 
-    APP_FOLDER = config.fetch('app_folder')
-    TEMPLATE_FOLDER = config.fetch('template_folder', app_name = app_name)
+    APP_FOLDER = config.get('app_folder')
+    TEMPLATE_FOLDER = config.get('template_folder', app_name=app_name)
     TEMPLATE_FOLDER_PATH = f'{APP_FOLDER}.{app_name}'
 
     try:
         environment = Environment(
-            loader = PackageLoader(TEMPLATE_FOLDER_PATH, TEMPLATE_FOLDER),
-            autoescape = select_autoescape()
+            loader=PackageLoader(TEMPLATE_FOLDER_PATH, TEMPLATE_FOLDER),
+            autoescape=select_autoescape()
         )
 
         return environment.get_template(template_name)
@@ -34,7 +34,7 @@ def fetch(app_name: str, template_name: str) -> Union[Template, None]:
     return None
 
 
-def render(template: Template, context: Dict[Any, Any]) -> str:
+def render(template_obj: Template, context: Dict[Any, Any]) -> str:
     """Render the given `template` using `context`.
 
     Args:
@@ -45,15 +45,15 @@ def render(template: Template, context: Dict[Any, Any]) -> str:
         `str`: The rendered template as a string.
     """
 
-    return template.render(**context)
+    return template_obj.render(**context)
 
 
 def load(app_name: str, template_name: str, context: Dict[Any, Any]) -> str:
-    """Fetch and render the given `template` in `app_name`.
+    """Get and render the given `template` in `app_name`.
 
     Args:
-        app_name (`str`): The name of the app to fetch from.
-        template_name (`str`): The name of the template to fetch.
+        app_name (`str`): The name of the app to get from.
+        template_name (`str`): The name of the template to get.
         context (`Dict[Any, Any]`): The context to pass to the template.
 
     Raises:
@@ -73,7 +73,7 @@ def load(app_name: str, template_name: str, context: Dict[Any, Any]) -> str:
 
     if not isinstance(context, dict):
         raise TypeError('context must be of type dict')
-    
-    template = fetch(app_name, template_name)
 
-    return render(template, context)
+    template_obj = get(app_name, template_name)
+
+    return render(template_obj, context)

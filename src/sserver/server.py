@@ -8,8 +8,8 @@ from sserver.util import config
 
 class BaseServer(OptionMixin):
 
-
-    def __init__(self, environment: Dict[str, str] = None, start_response: Callable = None):
+    def __init__(self, environment: Dict[str, str] = None,
+                 start_response: Callable = None):
         """Initialize the server.
 
         Args:
@@ -19,10 +19,9 @@ class BaseServer(OptionMixin):
 
         if environment is not None and start_response is not None:
             super().__init__({
-                'environment' : environment,
-                'start_response' : start_response,
+                'environment': environment,
+                'start_response': start_response,
             })
-
 
     def __iter__(self):
         """Get a response from the server.
@@ -32,7 +31,6 @@ class BaseServer(OptionMixin):
         """
 
         yield self.handle_request()
-
 
     def handle_request(self) -> bytes:
         """Handle a WSGI request.
@@ -44,11 +42,12 @@ class BaseServer(OptionMixin):
         status, headers, content = None, None, None
 
         try:
-        
+
             response = self.get_response()
 
             # Default headers and status to an OK HTML response
-            headers = response.get('headers', [('Content-Type', 'text/html')])
+            headers = response.get('headers',
+                                   [('Content-Type', 'text/html')])
 
             # Get status and ensure it is bytes
             status = response.get('status', '200 OK')
@@ -59,7 +58,7 @@ class BaseServer(OptionMixin):
                 content = str(content).encode('utf-8')
 
         except Exception as e:
-            log.exception(e, reraise = False)
+            log.exception(e, reraise=False)
 
             # Ensure a response for unexplained errors
             headers = [('Content-Type', 'text/html')]
@@ -70,7 +69,6 @@ class BaseServer(OptionMixin):
         start_response(status, headers)
 
         return content
-
 
     def get_response(self) -> Dict[str, str]:
         """Get the requests response.
@@ -84,7 +82,7 @@ class BaseServer(OptionMixin):
 
             matched_route = self.get_route()
 
-            if matched_route == None:
+            if matched_route is None:
                 return self.handle_404()
 
             else:
@@ -95,7 +93,6 @@ class BaseServer(OptionMixin):
             log.exception(e)
 
             return self.handle_500()
-
 
     def get_route(self) -> Union[route.Route, None]:
         """Get the matching route, if any, using the REQUEST_URI.
@@ -112,7 +109,6 @@ class BaseServer(OptionMixin):
 
         return matched_route
 
-
     def handle_route(self, matched_route: route.Route) -> Dict[str, str]:
         """Handle the request using the matched `matched_route`.
 
@@ -127,28 +123,24 @@ class BaseServer(OptionMixin):
         method = environment.get('REQUEST_METHOD')
         content = None
 
-        if method == 'GET':
-            content = matched_route.endpoint().get()
+        endpoint = matched_route.endpoint()
 
-        elif method == 'POST':
-            content = matched_route.endpoint().post()
+        method_map = {
+            'GET': endpoint.get,
+            'POST': endpoint.post,
+            'PUT': endpoint.put,
+            'DELETE': endpoint.delete,
+        }
 
-        elif method == 'PUT':
-            content = matched_route.endpoint().put()
-
-        elif method == 'PATCH':
-            content = matched_route.endpoint().patch()
-
-        elif method == 'DELETE':
-            content = matched_route.endpoint().delete()
+        if method in method_map:
+            content = method_map[method]()
 
         else:
             return self.handle_405()
 
         return {
-            'body' : content,
+            'body': content,
         }
-
 
     def handle_404(self) -> Dict[str, str]:
         """Handle 404 not found.
@@ -158,9 +150,8 @@ class BaseServer(OptionMixin):
         """
 
         return {
-            'body' : '404 Not Found',
+            'body': '404 Not Found',
         }
-    
 
     def handle_405(self) -> Dict[str, str]:
         """Handle 405 method not allowed.
@@ -170,9 +161,8 @@ class BaseServer(OptionMixin):
         """
 
         return {
-            'body' : '405 Method Not Allowed',
+            'body': '405 Method Not Allowed',
         }
-    
 
     def handle_500(self) -> Dict[str, str]:
         """Handle 500 internal server errors.
@@ -182,7 +172,7 @@ class BaseServer(OptionMixin):
         """
 
         return {
-            'body' : '500 Internal Server Error',
+            'body': '500 Internal Server Error',
         }
 
 
@@ -191,11 +181,12 @@ def application(environment, start_response) -> List[bytes]:
     server = BaseServer()
 
     server.setOptions({
-        'environment'    : environment,
-        'start_response' : start_response
+        'environment': environment,
+        'start_response': start_response
     })
 
     return [server.handle_request()]
+
 
 config.load()
 route.load()

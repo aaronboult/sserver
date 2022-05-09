@@ -26,7 +26,7 @@ def get_path_to_parent(parent_folder: str) -> Union[str, None]:
     for root, dirs, files in os.walk(os.getcwd()):
         if parent_folder in dirs:
             return os.path.join(root, parent_folder)
-    
+
     return None
 
 
@@ -42,15 +42,17 @@ def get_directory_list(directory: str) -> List[str]:
 
     if os.path.exists(directory):
         return [
-            os.join(directory, d)
-            for d in os.listdir(directory)
-            if os.path.isdir(os.join(directory, d))
+            subdirectory
+            for subdirectory in os.listdir(directory)
+            if os.path.isdir(os.path.join(directory, subdirectory))
         ]
 
     return []
 
 
-def get_path_list_to_file(filename: str, base_path: str = sys.path[0], folder_list: str = None, include_parent_folder: bool = False) -> List[str]:
+def get_path_list_to_file(filename: str, base_path: str = sys.path[0],
+                          folder_list: str = None,
+                          include_parent_folder: bool = False) -> List[str]:
     """Get a list of paths pointing at a file with name `filename`.
 
     Args:
@@ -76,15 +78,15 @@ def get_path_list_to_file(filename: str, base_path: str = sys.path[0], folder_li
             path_list.extend(
                 get_path_list_to_file(
                     filename,
-                    base_path = os.path.join(base_path, folder),
-                    folder_list = None,
-                    include_parent_folder = include_parent_folder
+                    base_path=os.path.join(base_path, folder),
+                    folder_list=None,
+                    include_parent_folder=include_parent_folder
                 )
             )
 
         return path_list
 
-    parent_dir = os.basename(os.getcwd())
+    parent_dir = os.path.basename(os.getcwd())
 
     for root, dirs, files in os.walk(base_path):
         if filename in files:

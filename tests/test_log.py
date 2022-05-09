@@ -7,42 +7,35 @@ from sserver.util import log
 class LoggerTest(unittest.TestCase):
     """Unittest the sserver.util.log module."""
 
-
     def test_format_int(self):
         """Test sserver.util.log.format_int."""
 
         self.assertEqual(log.format(10), '10')
-
 
     def test_format_float(self):
         """Test sserver.util.log.format_float."""
 
         self.assertEqual(log.format(10.5), '10.5')
 
-
     def test_format_none(self):
         """Test sserver.util.log.format, passing None."""
 
         self.assertEqual(log.format(None), 'None')
-
 
     def test_format_true(self):
         """Test sserver.util.log.format, passing True."""
 
         self.assertEqual(log.format(True), 'True')
 
-
     def test_format_false(self):
         """Test sserver.util.log.format, passing False."""
 
         self.assertEqual(log.format(False), 'False')
 
-
     def test_format_str(self):
         """Test sserver.util.log.format, passing a string."""
 
         self.assertEqual(log.format('test'), '"test"')
-
 
     def test_format_list(self):
         """Test sserver.util.log.format_list."""
@@ -61,7 +54,6 @@ class LoggerTest(unittest.TestCase):
 
         self.assertEqual(log.format_list(lst), expected)
 
-
     def test_format_tuple(self):
         """Test sserver.util.log.format_tuple."""
 
@@ -79,11 +71,11 @@ class LoggerTest(unittest.TestCase):
 
         self.assertEqual(log.format_tuple(tpl), expected)
 
-
     def test_format_set(self):
         """Test sserver.util.log.format_set."""
 
-        # The order of the items in the set is not guaranteed, so multiple expected
+        # The order of the items in the set is not guaranteed,
+        # so multiple expected
 
         st = {
             's1',
@@ -91,7 +83,7 @@ class LoggerTest(unittest.TestCase):
             's3',
         }
 
-        expected_posibilities = []
+        expected_posibility_list = []
 
         unordered_lines = [
             '\t"s1"',
@@ -106,29 +98,37 @@ class LoggerTest(unittest.TestCase):
             for j in range(number_of_lines):
                 for k in range(number_of_lines):
                     if i != j and i != k and j != k:
-                        expected_posibilities.append('{\n' + unordered_lines[i] + ',\n' + unordered_lines[j] + ',\n' + unordered_lines[k] + ',\n}')
+                        expected_possibility = (
+                            f'{{\n{unordered_lines[i]}',
+                            f',\n{unordered_lines[j]}',
+                            f',\n{unordered_lines[k]}',
+                            ',\n}',
+                        )
 
-        self.assertIn(log.format_set(st), expected_posibilities)
+                        expected_posibility_list.append(
+                            ''.join(expected_possibility)
+                        )
 
+        self.assertIn(log.format_set(st), expected_posibility_list)
 
     def test_format_dict(self):
         """Test sserver.util.log.format_dict."""
-        
+
         dct = {
-            'k1' : 'v1',
-            'k2' : {
-                'i1' : 'vi1',
+            'k1': 'v1',
+            'k2': {
+                'i1': 'vi1',
             },
-            'k3' : {
-                'i1' : {
-                    'i2' : {
-                        'ki2' : 'vi2',
+            'k3': {
+                'i1': {
+                    'i2': {
+                        'ki2': 'vi2',
                     },
-                    'ki1' : 'vi1',
+                    'ki1': 'vi1',
                 },
             },
         }
-        
+
         expected = '''{
 \t"k1" : "v1",
 \t"k2" : {

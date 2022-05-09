@@ -34,7 +34,6 @@ def info(text: str, context: Any = __Empty__):
         TypeError: If `text` is not a string.
     """
 
-
     if not isinstance(text, str):
         raise TypeError(f'text must be of type str, got {type(text)}')
 
@@ -56,7 +55,6 @@ def log(value: Any, context: Any = __Empty__):
             along with the `value`. Defaults to __Empty__.
     """
 
-
     info(format(value), context)
 
 
@@ -72,7 +70,6 @@ def label(label: str, context: Any = __Empty__):
     Raises:
         TypeError: If the `label` is not a string.
     """
-
 
     if not isinstance(label, str):
         raise TypeError(f'text must be of type str, got {type(label)}')
@@ -101,9 +98,10 @@ def exception(error: Exception, reraise: bool = False):
         `error`: The passed exception, raised if `reraise` is True.
     """
 
-
     if not isinstance(error, Exception):
-        raise TypeError(f'error must be of type Exception, got {type(error)}')
+        error_message = f'error must be of type Exception, got {type(error)}'
+
+        raise TypeError(error_message)
 
     label('Exception')
     log(str(error))
@@ -119,7 +117,6 @@ def linebreak(count: int = 1):
     Args:
         count (`int`, optional): The number of lines. Defaults to 1.
     """
-
 
     sys.stdout.write('\n' * count)
 
@@ -137,7 +134,6 @@ def format(content: Any, **kwargs: Any) -> str:
     Returns:
         `str`: The formatted content
     """
-
 
     format_methods = {
         dict: format_dict,
@@ -159,12 +155,14 @@ def format(content: Any, **kwargs: Any) -> str:
     return text
 
 
-def format_dict(dict_value: Dict[Any, Any], indent_level: int = 0, **kwargs: Any) -> str:
+def format_dict(dict_value: Dict[Any, Any], indent_level: int = 0,
+                **kwargs: Any) -> str:
     """Format the given `dict_value` into a string.
 
     Args:
         dict_value (`Dict[Any, Any]`): The dictionary to format.
-        indent_level (`int`, optional): The current indent level. Defaults to 0.
+        indent_level (`int`, optional): The current indent level. Defaults to
+            0.
 
     Raises:
         TypeError: If the `dict_value` is not a `dict`.
@@ -174,19 +172,29 @@ def format_dict(dict_value: Dict[Any, Any], indent_level: int = 0, **kwargs: Any
         `str`: The formatted dictionary string.
     """
 
-
     if not isinstance(dict_value, dict):
-        raise TypeError(f'dct must be of type dict, got {type(dict_value)}')
+        error_message = (
+            'dict_value must be of type dict, got',
+            f'{type(dict_value)}'
+        )
+
+        raise TypeError(''.join(error_message))
 
     if not isinstance(indent_level, int):
-        raise TypeError(f'indent_level must be of type int, got {type(indent_level)}')
+        error_message = (
+            'indent_level must be of type int, got ',
+            f'{type(indent_level)}',
+        )
+
+        raise TypeError(''.join(error_message))
 
     text = '{\n'
-    
+
     for key, value in dict_value.items():
         current_indent = '\t' * (indent_level + 1)
 
-        formatted_value = format(value, indent_level = indent_level + 1, **kwargs)
+        formatted_value = format(value, indent_level=indent_level + 1,
+                                 **kwargs)
 
         text += f'{current_indent}"{key}"{delimiter}{formatted_value},\n'
 
@@ -212,11 +220,14 @@ def format_list(list_value: List[Any], **kwargs: Any) -> str:
         `str`: The formatted list string.
     """
 
-
     if not isinstance(list_value, list):
-        raise TypeError(f'lst must be of type list, got {type(list_value)}')
+        error_message = (
+            f'list_value must be of type list, got {type(list_value)}',
+        )
 
-    return format_iterable(list_value, ('[', ']'), **kwargs) 
+        raise TypeError(''.join(error_message))
+
+    return format_iterable(list_value, ('[', ']'), **kwargs)
 
 
 def format_tuple(tuple_value: Tuple[Any], **kwargs: Any) -> str:
@@ -232,9 +243,12 @@ def format_tuple(tuple_value: Tuple[Any], **kwargs: Any) -> str:
         `str`: The formatted tuple string.
     """
 
-
     if not isinstance(tuple_value, tuple):
-        raise TypeError(f'tpl must be of type tuple, got {type(tuple_value)}')
+        error_message = (
+            f'tuple_value must be of type tuple, got {type(tuple_value)}',
+        )
+
+        raise TypeError(''.join(error_message))
 
     return format_iterable(tuple_value, ('(', ')'), **kwargs)
 
@@ -252,14 +266,19 @@ def format_set(set_value: Set[Any], **kwargs: Any) -> str:
         `str`: The formatted set string.
     """
 
-
     if not isinstance(set_value, set):
-        raise TypeError(f's must be of type set, got {type(set_value)}')
+        error_message = (
+            f'set_value must be of type set, got {type(set_value)}',
+        )
+
+        raise TypeError(''.join(error_message))
 
     return format_iterable(tuple(set_value), ('{', '}'), **kwargs)
 
 
-def format_iterable(iterable_value: Iterable, wrappers: Tuple[str], use_multiline: bool = True, indent_level: int = 0, **kwargs: Any) -> str:
+def format_iterable(iterable_value: Iterable, wrappers: Tuple[str],
+                    use_multiline: bool = True, indent_level: int = 0,
+                    **kwargs: Any) -> str:
     """Format the given `iterable_value` into a string.
 
     Args:
@@ -281,18 +300,34 @@ def format_iterable(iterable_value: Iterable, wrappers: Tuple[str], use_multilin
         str: The formatted iterable string.
     """
 
-
     if not isinstance(iterable_value, Iterable):
-        raise TypeError(f'iterable_value must be of type iterable, got {type(iterable_value)}')
+        error_message = (
+            'iterable_value must be of type iterable, got ',
+            f'{type(iterable_value)}',
+        )
+
+        raise TypeError(''.join(error_message))
 
     if not isinstance(wrappers, tuple):
-        raise TypeError(f'wrappers must be of type tuple, got {type(wrappers)}')
+        error_message = (
+            f'wrappers must be of type tuple, got {type(wrappers)}',
+        )
+
+        raise TypeError(''.join(error_message))
 
     if not isinstance(use_multiline, bool):
-        raise TypeError(f'use_multiline must be of type bool, got {type(use_multiline)}')
+        error_message = (
+            f'use_multiline must be of type bool, got {type(use_multiline)}',
+        )
+
+        raise TypeError(''.join(error_message))
 
     if not isinstance(indent_level, int):
-        raise TypeError(f'indent_level must be of type int, got {type(indent_level)}')
+        error_message = (
+            f'indent_level must be of type int, got {type(indent_level)}',
+        )
+
+        raise TypeError(''.join(error_message))
 
     # Open the wrapper
     text = wrappers[0]
@@ -309,13 +344,12 @@ def format_iterable(iterable_value: Iterable, wrappers: Tuple[str], use_multilin
 
         formatted_value = format(
             value,
-            use_multiline = use_multiline,
-            indent_level = indent_level + 1,
+            use_multiline=use_multiline,
+            indent_level=indent_level + 1,
             **kwargs
         )
 
         text += f'{formatted_value}{trail}'
-
 
     if use_multiline:
         indent_text = '\t' * indent_level
