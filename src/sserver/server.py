@@ -185,6 +185,8 @@ def application(environment, start_response) -> List[bytes]:
         'start_response': start_response
     })
 
+
+
     return [server.handle_request()]
 
 
