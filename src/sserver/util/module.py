@@ -1,9 +1,8 @@
-import sys
+import sys, importlib
 from types import ModuleType
 from typing import Any, Dict, List
 from sserver.util import config
 from sserver.path import path
-import importlib
 
 from sserver.util.exception import MissingConfigValueException
 

@@ -1,7 +1,6 @@
 from typing import Any, Dict, Union
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
-from sserver.util import log
-from sserver.util import config
+from sserver.util import log, config
 
 
 def get(app_name: str, template_name: str) -> Union[Template, None]:

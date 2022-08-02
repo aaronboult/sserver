@@ -1,11 +1,9 @@
 """Provides an interface to interact with the cached config."""
 
 from configparser import ConfigParser
-import os
-import sys
+import os, sys
 from typing import Any, Dict, Union
-from sserver.util import log
-from sserver.util import cache
+from sserver.util import log, cache
 from sserver.path import path
 
 
@@ -30,6 +28,9 @@ __PROJECT_DEFAULT_CONFIG = {
 
 __APP_DEFAULT_CONFIG = {
     'template_folder': 'templates',
+    'static_image_folder': 'static/image',
+    'static_css_folder': 'static/css',
+    'static_js_folder': 'static/js',
 }
 
 
@@ -221,14 +222,16 @@ def evaluate_config_value(config_parser: ConfigParser, section: str, key: str
     return value
 
 
-def get(key: str, app_name: str = '__project__'
-        ) -> Union[str, int, float, bool]:
+def get(key: str, app_name: str = '__project__',
+        default: Any = None) -> Union[str, int, float, bool]:
     """Get the value at `key` from app `app_name`.
 
     Args:
         key (`str`): The key to get the value from.
         app_name (`str`, optional): The app name to get from. Defaults
             to '__project__'.
+        default (`Any`, optional): The default value to return if the
+            key is not found. Defaults to None.
 
     Raises:
         TypeError: If the `key` is not a string.
@@ -243,9 +246,16 @@ def get(key: str, app_name: str = '__project__'
     app_config = get_app_config(app_name)
 
     if app_config is None:
-        return None
+        return default
 
-    return app_config.get(key)
+    if key in app_config:
+        return app_config.get(key)
+
+    return default
+
+
+def mget(*keys, app_name: str = '__project__') -> List:
+    pass
 
 
 def nested_get(*key_list: str, default: Any = None,

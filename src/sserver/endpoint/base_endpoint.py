@@ -2,8 +2,7 @@
 
 from typing import Any, Dict, Union
 from sserver.mixin.option_mixin import OptionMixin
-from sserver.util import config
-from sserver.util import module
+from sserver.util import config, module
 from sserver.endpoint import template
 
 

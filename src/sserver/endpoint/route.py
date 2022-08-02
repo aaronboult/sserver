@@ -2,10 +2,7 @@
 
 from typing import Any
 from sserver.endpoint.base_endpoint import BaseEndpoint
-from sserver.util import log
-from sserver.util import config
-from sserver.util import module
-from sserver.util import cache
+from sserver.util import log, config, cache, module
 
 
 class Route:

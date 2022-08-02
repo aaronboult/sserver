@@ -1,9 +1,8 @@
 from typing import Callable, Dict, List, Union
 from sserver.mixin.option_mixin import OptionMixin
 from sserver.endpoint import route
-from sserver.util import log
-from sserver.util import cache
-from sserver.util import config
+from sserver.util import log, cache, config
+from sserver.path import static
 
 
 class BaseServer(OptionMixin):
@@ -190,3 +189,4 @@ def application(environment, start_response) -> List[bytes]:
 
 config.load()
 route.load()
+static.load()

@@ -4,8 +4,7 @@ This module provides useful functions to aid with locating files in a dynamic
 environment.
 """
 
-import os
-import sys
+import os, sys
 from typing import List, Union
 
 
