@@ -2,7 +2,7 @@
 
 from configparser import ConfigParser
 import os, sys
-from typing import Any, Dict, Union
+from typing import Any, Dict, List, Union
 from sserver.util import log, cache
 from sserver.path import path
 
