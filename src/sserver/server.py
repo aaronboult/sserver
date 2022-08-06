@@ -187,6 +187,7 @@ def application(environment, start_response) -> List[bytes]:
     return [server.handle_request()]
 
 
+log.info('Loading config, route and static...')
 config.load()
 route.load()
 static.load()
