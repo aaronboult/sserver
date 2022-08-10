@@ -5,10 +5,10 @@ environment.
 """
 
 import os, sys
-from typing import List, Union
+from typing import List, Optional
 
 
-def get_path_to_parent(parent_folder: str) -> Union[str, None]:
+def get_path_to_parent(parent_folder: str) -> Optional[str]:
     """Get the path to the cloests directory with name `parent_folder`.
 
     Args:

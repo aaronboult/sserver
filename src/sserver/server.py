@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Optional
 from sserver.mixin.option_mixin import OptionMixin
 from sserver.endpoint import route
 from sserver.util import log, cache, config
@@ -93,7 +93,7 @@ class BaseServer(OptionMixin):
 
             return self.handle_500()
 
-    def get_route(self) -> Union[route.Route, None]:
+    def get_route(self) -> Optional[route.Route]:
         """Get the matching route, if any, using the REQUEST_URI.
 
         Returns:

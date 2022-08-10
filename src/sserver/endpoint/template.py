@@ -1,9 +1,9 @@
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sserver.util import log, config
 
 
-def get(app_name: str, template_name: str) -> Union[Template, None]:
+def get(app_name: str, template_name: str) -> Optional[Template]:
     """Get a template from `app_name` with name
     `template_name`.
 
