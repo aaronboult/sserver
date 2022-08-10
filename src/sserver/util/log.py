@@ -138,8 +138,8 @@ def format(content: Any, **kwargs: Any) -> str:
     format_methods = {
         dict: format_dict,
         list: format_list,
-        tuple: format_list,
-        set: format_list,
+        tuple: format_tuple,
+        set: format_set,
         str: lambda string_value, **kwargs: f'"{str(string_value)}"'
     }
 
