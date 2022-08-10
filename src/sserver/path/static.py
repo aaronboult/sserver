@@ -2,10 +2,14 @@
 
 
 import mimetypes
-import os, sys
-from typing import Optional, Union
+import os
+import sys
+from typing import Optional
+from typing import Union
 from sserver.path import path
-from sserver.util import cache, config, log
+from sserver.util import cache
+from sserver.util import config
+from sserver.util import log
 from shutil import copy
 
 

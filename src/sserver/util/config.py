@@ -1,8 +1,12 @@
 """Provides an interface to interact with the cached config."""
 
 from configparser import ConfigParser
-import os, sys
-from typing import Any, Dict, List, Union
+import os
+import sys
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Union
 from sserver.util import log, cache
 from sserver.path import path
 

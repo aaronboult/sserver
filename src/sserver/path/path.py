@@ -4,8 +4,10 @@ This module provides useful functions to aid with locating files in a dynamic
 environment.
 """
 
-import os, sys
-from typing import List, Optional
+import os
+import sys
+from typing import List
+from typing import Optional
 
 
 def get_path_to_parent(parent_folder: str) -> Optional[str]:
