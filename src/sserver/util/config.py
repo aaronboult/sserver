@@ -23,6 +23,7 @@ __PROJECT_DEFAULT_CONFIG = {
     'cache_port': 6379,
     'cache_string_decode ': True,
     'prefix_route_with_app_name': True,
+    'static_folder': 'static',
 }
 
 

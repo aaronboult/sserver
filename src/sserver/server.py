@@ -79,6 +79,10 @@ class BaseServer(OptionMixin):
         # Wrap entire request handle in try/except to report 500 errors
         try:
 
+            # Check if request is for a static file
+            if self.is_static_file():
+                return self.handle_static_file()
+
             matched_route = self.get_route()
 
             if matched_route is None:
@@ -92,6 +96,32 @@ class BaseServer(OptionMixin):
             log.exception(e)
 
             return self.handle_500()
+
+    def is_static_file(self) -> bool:
+        """Check if the request is for a static file.
+
+        Returns:
+            `bool`: True if static file, False otherwise.
+        """
+
+        environment = self.getOption('environment')
+
+        uri = environment.get('REQUEST_URI')
+
+        return static.is_static_file(uri)
+
+    def handle_static_file(self) -> Dict[str, str]:
+        """Handle a static file request.
+
+        Returns:
+            `Dict[str, str]`: The static file response.
+        """
+
+        environment = self.getOption('environment')
+
+        uri = environment.get('REQUEST_URI')
+
+        return static.get_static_file(uri)
 
     def get_route(self) -> Optional[route.Route]:
         """Get the matching route, if any, using the REQUEST_URI.
