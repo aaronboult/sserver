@@ -150,6 +150,7 @@ class BaseServer(OptionMixin):
 
         return {
             'body': '404 Not Found',
+            'status': '404 Not Found',
         }
 
     def handle_405(self) -> Dict[str, str]:
@@ -161,6 +162,7 @@ class BaseServer(OptionMixin):
 
         return {
             'body': '405 Method Not Allowed',
+            'status': '405 Method Not Allowed',
         }
 
     def handle_500(self) -> Dict[str, str]:
@@ -172,6 +174,7 @@ class BaseServer(OptionMixin):
 
         return {
             'body': '500 Internal Server Error',
+            'status': '500 Internal Server Error',
         }
 
 
