@@ -24,11 +24,6 @@ def load():
     APP_DIRECTORY_PATH = os.path.join(sys.path[0], APP_FOLDER)
     APP_DIRECTORY_LIST = path.get_directory_list(APP_DIRECTORY_PATH)
 
-    log.log('STATIC_FOLDER', STATIC_FOLDER)
-    log.log('APP_FOLDER', APP_FOLDER)
-    log.log('APP_DIRECTORY_PATH', APP_DIRECTORY_PATH)
-    log.log('APP_DIRECTORY_LIST', APP_DIRECTORY_LIST)
-
     # Ensure STATIC_FOLDER directory exists
     if not os.path.isdir(STATIC_FOLDER):
         os.mkdir(STATIC_FOLDER)
@@ -51,7 +46,6 @@ def load():
             ]
 
             for PATH_TO_CLONE in PATH_TO_CLONE_LIST:
-                log.log('PATH_TO_CLONE', PATH_TO_CLONE)
 
                 STATIC_PATH = os.path.join(STATIC_FOLDER, PATH_TO_CLONE)
 
@@ -95,8 +89,6 @@ def load():
                         ).replace(APP_FOLDER, '')
 
                         static_path_map[static_file_key] = static_file_path
-
-    log.log('static_path_map', static_path_map)
 
     cache.set('__static__', static_path_map)
 
