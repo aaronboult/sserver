@@ -71,9 +71,6 @@ def clear():
 def load():
     """Load routes from each `routes.py` file in the project.
 
-    Future:
-        `route.py` will be moved into the project config.
-
     Raises:
         TypeError: If the `prefix_with_app_name` config value is not a
             bool.
@@ -81,7 +78,10 @@ def load():
 
     clear()
 
-    route_module_list = module.load_from_filename('route.py')
+    ROUTE_FILENAME = config.get('route_filename')
+    ROUTE_LIST_VARIABLE = config.get('route_list_variable')
+
+    route_module_list = module.load_from_filename(f'{ROUTE_FILENAME}.py')
 
     route_manifest = []
 
@@ -106,7 +106,11 @@ def load():
 
             raise TypeError(''.join(error_message))
 
-        route_list = module.get_from_module(route_module, 'routes', [])
+        route_list = module.get_from_module(
+            route_module,
+            ROUTE_LIST_VARIABLE,
+            [],
+        )
         for route in route_list:
 
             # Ensure routes are prefixed by a slash
