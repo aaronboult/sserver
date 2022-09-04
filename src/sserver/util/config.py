@@ -26,12 +26,12 @@ __PROJECT_DEFAULT_CONFIG = {
     'cache_host': 'localhost',
     'cache_port': 6379,
     'cache_string_decode ': True,
-    'prefix_route_with_app_name': True,
     'static_folder': 'static',
 }
 
 
 __APP_DEFAULT_CONFIG = {
+    'prefix_route_with_app_name': True,
     'template_folder': 'templates',
     'static_image_folder': 'static/image',
     'static_css_folder': 'static/css',
@@ -133,9 +133,15 @@ def load(filename: str = 'config.ini', include_default_config: bool = True):
                     config_parser
                 )
 
+                app_level_config = {}
+
+                if APP in evalutated_config:
+                    app_level_config = evalutated_config.pop(APP)
+
                 config[APP] = {
                     **config[APP],
-                    **evalutated_config
+                    **evalutated_config,
+                    **app_level_config,
                 }
 
             log.log('app', APP)
