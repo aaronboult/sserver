@@ -34,7 +34,7 @@ __PROJECT_DEFAULT_CONFIG = {
 
 __APP_DEFAULT_CONFIG = {
     'prefix_route_with_app_name': True,
-    'template_folder': 'templates',
+    'template_folder': 'template',
     'static_image_folder': 'static/image',
     'static_css_folder': 'static/css',
     'static_js_folder': 'static/js',
