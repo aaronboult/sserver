@@ -71,9 +71,6 @@ def clear():
 def load():
     """Load routes from each `routes.py` file in the project.
 
-    Future:
-        `route.py` will be moved into the project config.
-
     Raises:
         TypeError: If the `prefix_with_app_name` config value is not a
             bool.
@@ -81,35 +78,48 @@ def load():
 
     clear()
 
-    route_module_list = module.load_from_filename('route.py')
+    ROUTE_FILENAME = config.get('route_filename')
+    ROUTE_LIST_VARIABLE = config.get('route_list_variable')
+
+    route_module_list = module.load_from_filename(f'{ROUTE_FILENAME}.py')
 
     route_manifest = []
 
-    prefix_with_app_name = config.get('prefix_route_with_app_name')
-    if prefix_with_app_name is None:
-        prefix_with_app_name = False
-
-    elif not isinstance(prefix_with_app_name, bool):
-        error_message = (
-            'Config value for prefix_route_with_app_name must be a boolean,',
-            f'got type {type(prefix_with_app_name)}',
-        )
-
-        raise TypeError(''.join(error_message))
-
     log.info('Loading Routes...', route_module_list)
     for route_module in route_module_list:
-        route_list = module.get_from_module(route_module, 'routes', [])
+
+        # Get the current app name
+        APP_NAME = module.get_app_name(route_module.__name__)
+        prefix_route_with_app_name = config.get(
+            'prefix_route_with_app_name',
+            app_name=APP_NAME
+        )
+
+        if prefix_route_with_app_name is None:
+            prefix_route_with_app_name = False
+
+        elif not isinstance(prefix_route_with_app_name, bool):
+            error_message = (
+                'Config value for prefix_route_with_app_name must be a ',
+                f'boolean, got type {type(prefix_route_with_app_name)}',
+            )
+
+            raise TypeError(''.join(error_message))
+
+        route_list = module.get_from_module(
+            route_module,
+            ROUTE_LIST_VARIABLE,
+            [],
+        )
         for route in route_list:
 
             # Ensure routes are prefixed by a slash
             if route.url[0] != '/':
                 route.url = f'/{route.url}'
 
-            if prefix_with_app_name:
-                # Get the apps folder name from the path and prepend to url
-                app_name = module.get_app_name(route_module.__name__)
-                route.url = f'/{app_name}{route.url}'
+            # If prefix with app name is True, prefix the route url
+            if prefix_route_with_app_name:
+                route.url = f'/{APP_NAME}{route.url}'
 
             info_message = (
                 f'Found Route "{route.url}", handled by ',
