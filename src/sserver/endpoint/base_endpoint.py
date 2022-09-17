@@ -3,7 +3,7 @@
 from typing import Any, Dict, Union
 from sserver.mixin.option_mixin import OptionMixin
 from sserver.util import config, module
-from sserver.template import template
+from sserver import templating
 
 
 class BaseEndpoint(OptionMixin):
@@ -40,8 +40,7 @@ class BaseEndpoint(OptionMixin):
         if not isinstance(template_name, str):
             raise TypeError('template_name must be of type str')
 
-        return template.load(
-            self.get_app_name(),
+        return templating.load(
             template_name,
             context,
         )

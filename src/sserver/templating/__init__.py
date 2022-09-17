@@ -1,10 +1,12 @@
-'''Provides basic implementation of logicless templating.'''
+'''Provides basic implementation templating with simple logic.'''
+
 
 from typing import Any, Dict, Optional
-from sserver.template.template import Template
-from sserver.template.template_renderer import TemplateRenderer
+from sserver.templating.template import Template
+from sserver.templating.template_renderer import TemplateRenderer
 
-def get(app_name: str, template_name: str) -> Optional[Template]:
+
+def get(template_name: str, app_name: Optional[str]) -> Optional[Template]:
     """Get a template from `app_name` with name
     `template_name`.
 
@@ -16,10 +18,17 @@ def get(app_name: str, template_name: str) -> Optional[Template]:
         `Template` | `None`: The template object, or None if not found.
     """
 
-    return Template().read(app_name, template_name)
+    if not isinstance(template_name, str):
+        raise TypeError('template_name must be of type str')
+
+    if app_name is not None and not isinstance(app_name, str):
+        raise TypeError('app_name must be of type str or None')
+
+    return Template().read(template_name, app_name=app_name)
 
 
-def load(app_name: str, template_name: str, context: Dict[Any, Any]) -> str:
+def load(template_name: str, context: Dict[Any, Any],
+         app_name: Optional[str] = None) -> str:
     """Get and render the given `template` in `app_name`.
 
     Args:
@@ -36,16 +45,16 @@ def load(app_name: str, template_name: str, context: Dict[Any, Any]) -> str:
         `str`: The rendered template
     """
 
-    if not isinstance(app_name, str):
-        raise TypeError('app_name must be of type str')
-
     if not isinstance(template_name, str):
         raise TypeError('template_name must be of type str')
 
     if not isinstance(context, dict):
         raise TypeError('context must be of type dict')
 
-    template_obj = get(app_name, template_name)
+    if app_name is not None and not isinstance(app_name, str):
+        raise TypeError('app_name must be of type str or None')
+
+    template_obj = get(template_name, app_name=app_name)
     renderer = TemplateRenderer(template_obj)
 
     return renderer.render(context)

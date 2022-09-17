@@ -1,7 +1,9 @@
 '''Template class for reading and rendering.'''
 
 from __future__ import annotations
-from os.path import join, exists, isfile
+from typing import Optional
+from os import sep
+from os.path import join, exists, isfile, normpath
 from sserver.util import log, config
 
 
@@ -23,16 +25,30 @@ class Template:
 
         return self._template_str
 
-    def read(self, app_name: str, template_name: str) -> Template:
+    def read(self, template_name: str, app_name: Optional[str] = None
+             ) -> Template:
         '''Loads a template from the apps template directory.
 
         Args:
-            app_name (`str`): The name of the app to load the template from.
             template_name (`str`): The name of the template to load.
+            app_name (`str`, Optional): The name of the app to load
+                the template from. If not passed, app_name will be
+                extracted from template_name.
 
         Returns:
             `Template`: This template object.
         '''
+
+        # Separate the template_name into components (assuming path)
+        template_name = normpath(template_name)
+        template_name_components = template_name.split(sep)
+
+        # If app_name is not passed, extract it from the template_name
+        if app_name is None:
+            app_name = template_name_components[0]
+
+        # Reconstruct template name ignoring first component
+        template_name = join(*template_name_components[1:])
 
         APP_FOLDER = config.get('app_folder')
         TEMPLATE_FOLDER = config.get('template_folder', app_name=app_name)
@@ -43,6 +59,10 @@ class Template:
             template_name
         )
 
+        log.log('app_name', app_name)
+        log.log('template_name', template_name)
+        log.log('APP_FOLDER', APP_FOLDER)
+        log.log('TEMPLATE_FOLDER', TEMPLATE_FOLDER)
         log.log('TEMPLATE_PATH', TEMPLATE_PATH)
 
         template_str = None
