@@ -6,6 +6,7 @@ Attributes:
 """
 
 import sys
+import traceback
 from typing import Any, Dict, Iterable, List, Set, Tuple
 
 
@@ -106,6 +107,8 @@ def exception(error: Exception, reraise: bool = False):
     label('Exception')
     log(str(error))
     linebreak()
+    label('Traceback')
+    log(traceback.format_exc())
 
     if reraise:
         raise error
