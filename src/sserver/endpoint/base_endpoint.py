@@ -3,7 +3,7 @@
 from typing import Any, Dict, Union
 from sserver.mixin.option_mixin import OptionMixin
 from sserver.util import config, module
-from sserver.endpoint import template
+from sserver.template import template
 
 
 class BaseEndpoint(OptionMixin):
@@ -33,7 +33,7 @@ class BaseEndpoint(OptionMixin):
 
         template_name = getattr(self, 'template_name', None)
 
-        # Empty response if no template_name set
+        # Return context if no template_name set
         if template_name is None:
             return context
 

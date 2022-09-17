@@ -1,7 +1,8 @@
-from typing import Any, Dict, Optional
-from jinja2 import Environment, PackageLoader, Template, select_autoescape
-from sserver.util import log, config
+'''Provides basic implementation of logicless templating.'''
 
+from typing import Any, Dict, Optional
+from sserver.template.template import Template
+from sserver.template.template_renderer import TemplateRenderer
 
 def get(app_name: str, template_name: str) -> Optional[Template]:
     """Get a template from `app_name` with name
@@ -15,36 +16,7 @@ def get(app_name: str, template_name: str) -> Optional[Template]:
         `Template` | `None`: The template object, or None if not found.
     """
 
-    APP_FOLDER = config.get('app_folder')
-    TEMPLATE_FOLDER = config.get('template_folder', app_name=app_name)
-    TEMPLATE_FOLDER_PATH = f'{APP_FOLDER}.{app_name}'
-
-    try:
-        environment = Environment(
-            loader=PackageLoader(TEMPLATE_FOLDER_PATH, TEMPLATE_FOLDER),
-            autoescape=select_autoescape()
-        )
-
-        return environment.get_template(template_name)
-
-    except Exception as exception:
-        log.exception(exception)
-
-    return None
-
-
-def render(template_obj: Template, context: Dict[Any, Any]) -> str:
-    """Render the given `template` using `context`.
-
-    Args:
-        template (`Template`): The template to render.
-        context (`Dict[Any, Any]`): The context passed to the template.
-
-    Returns:
-        `str`: The rendered template as a string.
-    """
-
-    return template_obj.render(**context)
+    return Template().read(app_name, template_name)
 
 
 def load(app_name: str, template_name: str, context: Dict[Any, Any]) -> str:
@@ -74,5 +46,6 @@ def load(app_name: str, template_name: str, context: Dict[Any, Any]) -> str:
         raise TypeError('context must be of type dict')
 
     template_obj = get(app_name, template_name)
+    renderer = TemplateRenderer(template_obj)
 
-    return render(template_obj, context)
+    return renderer.render(context)
