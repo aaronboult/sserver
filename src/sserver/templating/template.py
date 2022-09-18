@@ -1,6 +1,5 @@
 '''Template class for reading and rendering.'''
 
-from __future__ import annotations
 from typing import Optional
 from os import sep
 from os.path import join, exists, isfile, normpath
@@ -10,10 +9,14 @@ from sserver.util import log, config
 class Template:
     '''The template class for loading and rendering templates.'''
 
-    def __init__(self) -> None:
+    def __init__(self, template_name: Optional[str] = None,
+                 app_name: Optional[str] = None) -> None:
         '''Initializes the template class.'''
 
         self._template_str = None
+
+        if template_name is not None:
+            self.read(template_name, app_name)
 
     @property
     def template_str(self) -> str:
@@ -26,7 +29,7 @@ class Template:
         return self._template_str
 
     def read(self, template_name: str, app_name: Optional[str] = None
-             ) -> Template:
+             ):
         '''Loads a template from the apps template directory.
 
         Args:

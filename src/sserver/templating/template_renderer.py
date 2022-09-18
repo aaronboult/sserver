@@ -51,7 +51,7 @@ class TemplateRenderer:
             if func_name == 'include':
                 log.log('args', args)
 
-                template_to_include = Template().read(args[0]).template_str
+                template_to_include = Template(args[0]).template_str
 
                 if template_to_include is not None:
                     preprocessed_template_str += template_to_include

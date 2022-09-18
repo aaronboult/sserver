@@ -24,7 +24,7 @@ def get(template_name: str, app_name: Optional[str]) -> Optional[Template]:
     if app_name is not None and not isinstance(app_name, str):
         raise TypeError('app_name must be of type str or None')
 
-    return Template().read(template_name, app_name=app_name)
+    return Template(template_name, app_name=app_name)
 
 
 def load(template_name: str, context: Dict[Any, Any],
