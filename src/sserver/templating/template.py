@@ -28,6 +28,15 @@ class Template:
 
         return self._template_str
 
+    def set_template_str(self, template_str: str) -> None:
+        '''Sets the template string.
+
+        Args:
+            template_str (`str`): The template string.
+        '''
+
+        self._template_str = template_str
+
     def read(self, template_name: str, app_name: Optional[str] = None
              ):
         '''Loads a template from the apps template directory.
