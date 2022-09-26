@@ -21,6 +21,31 @@ _OPERATOR_MAP = {
 }
 
 
+def parse_args(context: Dict[str, Any], args: List[str]) -> List[Any]:
+    '''Parses the arguments passed to a tag.
+
+    Args:
+        args (`List[str]`): The arguments passed to the tag.
+
+    Returns:
+        `List[Any]`: The parsed arguments.
+    '''
+
+    parsed_args = []
+
+    # @future Support dot notation in template, e.g. if a.b.c == d.e.f
+    # @future Parse literals in template, e.g. if a == 1
+
+    for argument in args:
+        if argument in context:
+            parsed_args.append(context[argument])
+
+        else:
+            parsed_args.append(argument)
+
+    return parsed_args
+
+
 def _deconstruct_tag(tag_match: re.Match) -> Tuple[str, str]:
     '''Deconstructs a tag match into its name and arguments.
 
@@ -369,31 +394,6 @@ class TemplateRenderer:
         return self._render_raw(context).format(**context)
 
 # Template tag functions
-
-
-def parse_args(context: Dict[str, Any], args: List[str]) -> List[Any]:
-    '''Parses the arguments passed to a tag.
-
-    Args:
-        args (`List[str]`): The arguments passed to the tag.
-
-    Returns:
-        `List[Any]`: The parsed arguments.
-    '''
-
-    parsed_args = []
-
-    # @future Support dot notation in template, e.g. if a.b.c == d.e.f
-    # @future Parse literals in template, e.g. if a == 1
-
-    for argument in args:
-        if argument in context:
-            parsed_args.append(context[argument])
-
-        else:
-            parsed_args.append(argument)
-
-    return parsed_args
 
 
 def include(context: Dict[str, Any], *args) -> str:
