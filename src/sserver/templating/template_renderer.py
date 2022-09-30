@@ -1,4 +1,4 @@
-'''Template renderer.'''
+"""Template renderer."""
 
 import re
 import operator
@@ -47,14 +47,14 @@ def parse_args(context: Dict[str, Any], args: List[str]) -> List[Any]:
 
 
 def _deconstruct_tag(tag_match: re.Match) -> Tuple[str, str]:
-    '''Deconstructs a tag match into its name and arguments.
+    """Deconstructs a tag match into its name and arguments.
 
     Args:
         tag_match (`re.Match`): The tag match to deconstruct.
 
     Returns:
         `Tuple[str, str]`: The tag name and arguments.
-    '''
+    """
 
     # Cleanup the syntax contents and separate items
     syntax_contents = tag_match.group(1).strip().split(' ')
@@ -67,15 +67,15 @@ def _deconstruct_tag(tag_match: re.Match) -> Tuple[str, str]:
 
 
 class _TagLogicBlock:
-    '''A logical block in a template.'''
+    """A logical block in a template."""
 
     def __init__(self, block_start_match: re.Match):
-        '''Initializes a new RenderBlock.
+        """Initializes a new RenderBlock.
 
         Args:
             block_start_match (`re.Match`): The match object for the
                 block start tag.
-        '''
+        """
 
         self._block_start_match = block_start_match
         self._block_close_match = None
@@ -87,23 +87,23 @@ class _TagLogicBlock:
 
     @property
     def tag(self) -> str:
-        '''The tag name.
+        """The tag name.
 
         Returns:
             `str`: The tag name.
-        '''
+        """
 
         return self._tag
 
     def try_add_sub_tag(self, tag_match: re.Match) -> bool:
-        '''Tries to add a sub tag to this block.
+        """Tries to add a sub tag to this block.
 
         Args:
             tag_match (`re.Match`): The matched tag.
 
         Returns:
             `bool`: True if the tag was added, False otherwise.
-        '''
+        """
 
         if self._block_close_tag_depth > 0:
             return False
@@ -119,7 +119,7 @@ class _TagLogicBlock:
         return False
 
     def check_closing_tag(self, tag_match: re.Match) -> bool:
-        '''Checks if the given tag match is the closing tag for this
+        """Checks if the given tag match is the closing tag for this
             block.
 
         Args:
@@ -128,7 +128,7 @@ class _TagLogicBlock:
         Returns:
             `bool`: True if the tag_match is the closing tag for this
                 block, False otherwise.
-        '''
+        """
 
         tag_name, _ = _deconstruct_tag(tag_match)
 
@@ -153,12 +153,12 @@ class _TagLogicBlock:
 
     def render(self, template_str: str, context: Dict[str, Any]
                ) -> Tuple[str, int]:
-        '''Renders the block.
+        """Renders the block.
 
         Returns:
             `Tuple[str, int]`: The rendered block and the end index of
                 the block.
-        '''
+        """
 
         USING_SUB_TAG = self._current_sub_tag_index > -1
 
@@ -237,10 +237,10 @@ class _TagLogicBlock:
 
 
 class _TagLogicBlockContents(str):
-    '''Contents of a tag logic block.'''
+    """Contents of a tag logic block."""
 
     def render(self, context: Dict[str, Any]) -> str:
-        '''Renders the contents of the block.
+        """Renders the contents of the block.
 
         Args:
             context (`Dict[str, Any]`): The context to render the
@@ -248,7 +248,7 @@ class _TagLogicBlockContents(str):
 
         Returns:
             `str`: The rendered contents.
-        '''
+        """
 
         nested_template = Template()
         nested_template.set_template_str(self)
@@ -261,20 +261,20 @@ class _TagLogicBlockContents(str):
 
 
 class TemplateRenderer:
-    '''Template renderer.'''
+    """Template renderer."""
 
     def __init__(self, template: Template):
-        '''Initializes the template renderer.
+        """Initializes the template renderer.
 
         Args:
             template (`str`): The template to render.
-        '''
+        """
 
         self._template = template
 
     def _preprocess(self, template_str: str, context: Dict[str, Any]
                     ) -> str:
-        '''Preprocesses the template string.
+        """Preprocesses the template string.
 
         Args:
             template_str (`str`): The template string to preprocess.
@@ -287,7 +287,7 @@ class TemplateRenderer:
         Raises:
             `UnknownTagException`: If a tag is not recognized.
             `UnclosedBlockException`: If a block is not closed.
-        '''
+        """
 
         preprocessed_template_str = ''
 
@@ -364,11 +364,11 @@ class TemplateRenderer:
         return preprocessed_template_str
 
     def _render_raw(self, context: Dict[str, Any]) -> str:
-        '''Renders the template without formatting.
+        """Renders the template without formatting.
 
         Returns:
             `str`: The rendered template before substitution.
-        '''
+        """
 
         template_str = self._template.template_str
 
@@ -381,7 +381,7 @@ class TemplateRenderer:
         return template_str
 
     def render(self, context: Dict[str, Any]) -> str:
-        '''Renders the template with the given context.
+        """Renders the template with the given context.
 
         Args:
             **context (`Any`, optional): The context to render the template
@@ -389,7 +389,7 @@ class TemplateRenderer:
 
         Returns:
             `str`: The rendered template.
-        '''
+        """
 
         return self._render_raw(context).format(**context)
 
@@ -397,7 +397,7 @@ class TemplateRenderer:
 
 
 def include(context: Dict[str, Any], *args) -> str:
-    '''Includes a template.
+    """Includes a template.
 
     Args:
         *args (`str`): Arguments passed to the tag.
@@ -405,7 +405,7 @@ def include(context: Dict[str, Any], *args) -> str:
     Note:
         Expects len(args) == 1 and args[0] to be the template to
             import.
-    '''
+    """
 
     template_to_include = Template(args[0]).template_str
 
@@ -417,7 +417,7 @@ def include(context: Dict[str, Any], *args) -> str:
 
 def conditional_block(context: Dict[str, Any], block_contents:
                       _TagLogicBlockContents, *args) -> Optional[str]:
-    '''Renders a conditional if statement.
+    """Renders a conditional if statement.
 
     Args:
         context (`Dict[str, Any]`): The context to render the block
@@ -436,7 +436,7 @@ def conditional_block(context: Dict[str, Any], block_contents:
 
     Returns:
         `str`: The rendered block.
-    '''
+    """
 
     if len(args) == 0:
         return block_contents
@@ -463,7 +463,7 @@ def conditional_block(context: Dict[str, Any], block_contents:
 
 def for_block(context: Dict[str, Any], block_contents:
               _TagLogicBlockContents, *args) -> str:
-    '''Renders a for loop.
+    """Renders a for loop.
 
     Args:
         context (`Dict[str, Any]`): The context to render the block
@@ -474,7 +474,7 @@ def for_block(context: Dict[str, Any], block_contents:
 
     Returns:
         `str`: The rendered block.
-    '''
+    """
 
     output = ''
 
@@ -526,7 +526,7 @@ _RENDER_INLINE_TAGS = {
 
 def _get_tag_function(tag_name: str, is_block: bool = False,
                       sub_tag: Optional[str] = None) -> callable:
-    '''Gets the tag function for the given tag name.
+    """Gets the tag function for the given tag name.
 
     Args:
         tag_name (`str`): The name of the tag.
@@ -540,7 +540,7 @@ def _get_tag_function(tag_name: str, is_block: bool = False,
         `UnknownTagException`: If the tag is not recognized.
         `MissingTagFunctionException`: If the tag does not have a
             function.
-    '''
+    """
     tag_data = (
         _RENDER_BLOCK_TAGS if is_block
         else _RENDER_INLINE_TAGS
@@ -575,7 +575,7 @@ def _get_tag_function(tag_name: str, is_block: bool = False,
 def _try_validate_args_len(tag_name: str, args: List[Any],
                            is_block: bool = False,
                            sub_tag: Optional[str] = None) -> bool:
-    '''Tries to validate the length of the arguments passed to a tag.
+    """Tries to validate the length of the arguments passed to a tag.
 
     Args:
         tag_name (`str`): The name of the tag.
@@ -589,7 +589,7 @@ def _try_validate_args_len(tag_name: str, args: List[Any],
 
     Raises:
         `UnknownTagException`: If the tag is not recognized.
-    '''
+    """
 
     tag_data = (
         _RENDER_BLOCK_TAGS if is_block

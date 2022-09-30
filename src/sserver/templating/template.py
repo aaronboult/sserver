@@ -1,4 +1,4 @@
-'''Template class for reading and rendering.'''
+"""Template class for reading and rendering."""
 
 from typing import Optional
 from os import sep
@@ -7,11 +7,11 @@ from sserver.util import log, config
 
 
 class Template:
-    '''The template class for loading and rendering templates.'''
+    """The template class for loading and rendering templates."""
 
     def __init__(self, template_name: Optional[str] = None,
-                 app_name: Optional[str] = None) -> None:
-        '''Initializes the template class.'''
+                 app_name: Optional[str] = None):
+        """Initializes the template class."""
 
         self._template_str = None
 
@@ -20,26 +20,26 @@ class Template:
 
     @property
     def template_str(self) -> str:
-        '''Gets the template string.
+        """Gets the template string.
 
         Returns:
             `str`: The template string.
-        '''
+        """
 
         return self._template_str
 
-    def set_template_str(self, template_str: str) -> None:
-        '''Sets the template string.
+    def set_template_str(self, template_str: str):
+        """Sets the template string.
 
         Args:
             template_str (`str`): The template string.
-        '''
+        """
 
         self._template_str = template_str
 
     def read(self, template_name: str, app_name: Optional[str] = None
              ):
-        '''Loads a template from the apps template directory.
+        """Loads a template from the apps template directory.
 
         Args:
             template_name (`str`): The name of the template to load.
@@ -49,7 +49,7 @@ class Template:
 
         Returns:
             `Template`: This template object.
-        '''
+        """
 
         # Separate the template_name into components (assuming path)
         template_name = normpath(template_name)

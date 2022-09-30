@@ -46,11 +46,11 @@ class LoggerTest(unittest.TestCase):
             'l3',
         ]
 
-        expected = '''[
+        expected = """[
 \t"l1",
 \t"l2",
 \t"l3",
-]'''
+]"""
 
         self.assertEqual(log.format_list(lst), expected)
 
@@ -63,11 +63,11 @@ class LoggerTest(unittest.TestCase):
             't3',
         )
 
-        expected = '''(
+        expected = """(
 \t"t1",
 \t"t2",
 \t"t3",
-)'''
+)"""
 
         self.assertEqual(log.format_tuple(tpl), expected)
 
@@ -129,7 +129,7 @@ class LoggerTest(unittest.TestCase):
             },
         }
 
-        expected = '''{
+        expected = """{
 \t"k1" : "v1",
 \t"k2" : {
 \t\t"i1" : "vi1",
@@ -142,6 +142,6 @@ class LoggerTest(unittest.TestCase):
 \t\t\t"ki1" : "vi1",
 \t\t},
 \t},
-}'''
+}"""
 
         self.assertEqual(log.format_dict(dct), expected)

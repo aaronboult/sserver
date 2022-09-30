@@ -1,4 +1,4 @@
-'''Provides basic implementation templating with simple logic.'''
+"""Provides basic implementation templating with simple logic."""
 
 
 from typing import Any, Dict, Optional

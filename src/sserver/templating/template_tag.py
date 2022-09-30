@@ -1,4 +1,4 @@
-'''Template tags called in templates.'''
+"""Template tags called in templates."""
 
 
 from typing import List
@@ -8,7 +8,7 @@ from sserver.templating import exception
 # Decorator to validate the number of arguments passed to a tag
 def validate_args_len(tag_name: str, args: List[str], expected_len:
                       int) -> bool:
-    '''Validates the length of the arguments passed to a tag.
+    """Validates the length of the arguments passed to a tag.
 
     Args:
         tag_name (`str`): The name of the tag.
@@ -24,7 +24,7 @@ def validate_args_len(tag_name: str, args: List[str], expected_len:
     Returns:
         `bool`: True if the arguments are valid, an exception is
             raised otherwise.
-    '''
+    """
 
     args_len = len(args)
 
