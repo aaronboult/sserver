@@ -38,7 +38,7 @@ def validate_args_len(tag_name: str, args: List[str], expected_len:
     if args_len > expected_len:
         raise exception.TooManyTagArgumentsException(
             (
-                f'Too many arguments passed to {tag_name} tag. ',
+                f'Too many arguments passed to {tag_name} tag. '
                 f'Expected {expected_len} arguments, got {args_len}.'
             )
         )
@@ -46,7 +46,7 @@ def validate_args_len(tag_name: str, args: List[str], expected_len:
     if args_len < expected_len:
         raise exception.MissingTagArgumentsException(
             (
-                f'Missing arguments passed to {tag_name} tag. ',
+                f'Missing arguments passed to {tag_name} tag. '
                 f'Expected {expected_len} arguments, got {args_len}.'
             )
         )
