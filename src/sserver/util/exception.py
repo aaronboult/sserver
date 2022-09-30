@@ -12,3 +12,11 @@ class CacheAlreadyInitializedException(Exception):
 
 class MissingConfigValueException(Exception):
     """Raised when an invalid config value is set."""
+
+
+class UnknownLiteralType(Exception):
+    """Raised when an unknown literal type is encountered."""
+
+
+class ExpressionSyntaxError(Exception):
+    """Raised when an expression syntax error is encountered."""

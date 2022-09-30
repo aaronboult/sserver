@@ -6,44 +6,13 @@ from typing import Any, Dict, List, Optional, Tuple
 from sserver.templating.template import Template
 from sserver.templating import exception
 from sserver.templating.template_tag import validate_args_len
+from sserver.util.parse import (
+    parse_string_to_python,
+    OPERATOR_MAP,
+)
 
 
 _LOGIC_TAG_SYNTAX = '{%(.+)%}'
-
-# Maps string operators onto the operator module functions
-_OPERATOR_MAP = {
-    '==': operator.eq,
-    '!=': operator.ne,
-    '>': operator.gt,
-    '>=': operator.ge,
-    '<': operator.lt,
-    '<=': operator.le,
-}
-
-
-def parse_args(context: Dict[str, Any], args: List[str]) -> List[Any]:
-    '''Parses the arguments passed to a tag.
-
-    Args:
-        args (`List[str]`): The arguments passed to the tag.
-
-    Returns:
-        `List[Any]`: The parsed arguments.
-    '''
-
-    parsed_args = []
-
-    # @future Support dot notation in template, e.g. if a.b.c == d.e.f
-    # @future Parse literals in template, e.g. if a == 1
-
-    for argument in args:
-        if argument in context:
-            parsed_args.append(context[argument])
-
-        else:
-            parsed_args.append(argument)
-
-    return parsed_args
 
 
 def _deconstruct_tag(tag_match: re.Match) -> Tuple[str, str]:
@@ -61,7 +30,7 @@ def _deconstruct_tag(tag_match: re.Match) -> Tuple[str, str]:
 
     # Get the function name and args
     func_name = syntax_contents[0]
-    args = syntax_contents[1:]
+    args = ' '.join(syntax_contents[1:])
 
     return func_name, args
 
@@ -187,7 +156,7 @@ class _TagLogicBlock:
 
         # Get and parse the block arguments
         tag_name, args = _deconstruct_tag(CURRENT_RENDER_MATCH)
-        parsed_args = parse_args(context, args)
+        parsed_args = parse_string_to_python(context, args)
 
         tag_function = _get_tag_function(
             self._tag,
@@ -338,7 +307,10 @@ class TemplateRenderer:
             elif tag_name in _RENDER_INLINE_TAGS:
                 # Get the template function and call it passing
                 # parsed args
-                parsed_args = parse_args(context, tag_args)
+                parsed_args = parse_string_to_python(
+                    context,
+                    tag_args
+                )
 
                 tag_function = _get_tag_function(tag_name)
                 _try_validate_args_len(tag_name, parsed_args)
@@ -445,12 +417,12 @@ def conditional_block(context: Dict[str, Any], block_contents:
     operator = args[1]
     right_expression = args[2]
 
-    if operator not in _OPERATOR_MAP:
+    if operator not in OPERATOR_MAP:
         raise exception.UnknownTagConditionalExpressionException(
             f'Unknown operator {operator}'
         )
 
-    conditional_output = _OPERATOR_MAP[operator](
+    conditional_output = OPERATOR_MAP[operator](
         left_expression,
         right_expression
     )
