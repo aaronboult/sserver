@@ -7,7 +7,6 @@ from sserver.parse.literal import (
     Operator,
     Context
 )
-from sserver.util import log
 
 
 ExpressionItem = Union[Operator, Evaluatable]

@@ -116,6 +116,7 @@ def get_constant_operator_map() -> Dict[str, Dict[str, Any]]:
 
     return copy.deepcopy(_constant_operator_map)
 
+
 def add_constant_operator(operator_name: str, value: Any):
     """Adds a constant operator to the operator map.
 
