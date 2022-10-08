@@ -63,4 +63,4 @@ def load(template_name: str, context: Dict[Any, Any],
 def register():
     """Registers builtin template tags."""
 
-    from sserver.templating import template_tag
+    from sserver.templating import template_tag  # noqa: F401
