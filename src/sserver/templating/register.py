@@ -169,8 +169,10 @@ def _register_block_tag(tag_name: str, end_tag: str,
     _block_tag_map[tag_name] = {
         'end_tag': end_tag,
         'tag_function': tag_function,
-        'sub_tags': sub_tag_list
     }
+
+    if sub_tag_list is not None:
+        _block_tag_map[tag_name]['sub_tags'] = sub_tag_list
 
 
 def _register_inline_tag(tag_name: str, tag_function: callable):
