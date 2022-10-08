@@ -1,7 +1,7 @@
 """Definitions and functions for literal object handling."""
 
 
-import math
+import copy
 import inspect
 import operator
 from typing import Any, Dict, Optional, Tuple, Type, Union
@@ -9,15 +9,11 @@ from sserver.parse import exception
 
 
 # Maps string operators onto the operator module functions
-CONSTANT_OPERATOR_MAP = {
-    'pi': {
-        'function': lambda: math.pi,
-    },
-}
+_constant_operator_map = {}
 
-CONSTANT_OPERATOR_PRECEDENCE = 8
+_CONSTANT_OPERATOR_PRECEDENCE = 8
 
-ARITHMETIC_OPERATOR_MAP = {
+_ARITHMETIC_OPERATOR_MAP = {
     '+': {
         'function': operator.add,
         'precedence': 5,
@@ -48,7 +44,7 @@ ARITHMETIC_OPERATOR_MAP = {
     },
 }
 
-LOGICAL_OPERATOR_MAP = {
+_LOGICAL_OPERATOR_MAP = {
     '==': {
         'function': operator.eq,
     },
@@ -72,9 +68,9 @@ LOGICAL_OPERATOR_MAP = {
     }
 }
 
-LOGICAL_OPERATOR_PRECEDENCE = 4
+_LOGICAL_OPERATOR_PRECEDENCE = 4
 
-KEYWORD_OPERATOR_MAP = {
+_KEYWORD_OPERATOR_MAP = {
     'not': {
         'function': operator.not_,
         'precedence': 3,
@@ -89,41 +85,18 @@ KEYWORD_OPERATOR_MAP = {
     },
 }
 
-VALID_OPERATOR_CHARS = (
-    list(ARITHMETIC_OPERATOR_MAP.keys()) +
-    list(CONSTANT_OPERATOR_MAP.keys()) +
-    list(LOGICAL_OPERATOR_MAP.keys()) +
-    list(KEYWORD_OPERATOR_MAP.keys())
-)
+
+def _get_valid_operator_chars():
+    return (
+        tuple(_ARITHMETIC_OPERATOR_MAP.keys()) +
+        tuple(_constant_operator_map.keys()) +
+        tuple(_LOGICAL_OPERATOR_MAP.keys()) +
+        tuple(_KEYWORD_OPERATOR_MAP.keys())
+    )
 
 
 # Literal syntax map
-_literal_syntax_map = {
-    # '"': {
-    #     'value_type': str,
-    #     'escape_char': '\\',
-    #     'end_char': '"',
-    #     'literal_class': StringLiteral,
-    # },
-    # '\'': {
-    #     'value_type': str,
-    #     'escape_char': '\\',
-    #     'end_char': '\'',
-    #     'literal_class': StringLiteral,
-    # },
-    # '[': {
-    #     'value_type': list,
-    #     'escape_char': None,
-    #     'end_char': ']',
-    #     'literal_class': ListLiteral,
-    # },
-    # '(' : {
-    #     'value_type': Expression,
-    #     'escape_char': None,
-    #     'end_char': ')',
-    #     'literal_class': ParenthesisLiteral,
-    # },
-}
+_literal_syntax_map = {}
 
 
 # Alias for literal match
@@ -131,6 +104,55 @@ LiteralMatch = Dict[str, Union[str, Type, None]]
 
 # Alias for context
 Context = Dict[str, Any]
+
+
+# Getter for constant operator map
+def get_constant_operator_map() -> Dict[str, Dict[str, Any]]:
+    """The constant operator map.
+
+    Returns:
+        `Dict[str, Dict[str, Any]]`: The constant operator map.
+    """
+
+    return copy.deepcopy(_constant_operator_map)
+
+def add_constant_operator(operator_name: str, value: Any):
+    """Adds a constant operator to the operator map.
+
+    Args:
+        operator_name (`str`): The name of the operator.
+        value (`Any`): The value of the operator.
+    """
+
+    if operator_name in _constant_operator_map:
+        raise exception.OperatorAlreadyExistsException(
+            f'Operator "{operator_name}" already exists.'
+        )
+
+    _constant_operator_map[operator_name] = {
+        'function': lambda: value,
+    }
+
+
+# Add constant operators to the operator map
+def try_add_constant_operator(operator_name: str, value: Any
+                              ) -> bool:
+    """Attempts to add a constant operator to the operator map.
+
+    Args:
+        operator_name (`str`): The name of the operator.
+        value (`Any`): The value of the operator.
+
+    Returns:
+        `bool`: Whether the operator was added.
+    """
+
+    try:
+        add_constant_operator(operator_name, value)
+        return True
+
+    except exception.OperatorAlreadyExistsException:
+        return False
 
 
 # Getter for literal syntax map
@@ -141,7 +163,7 @@ def get_literal_syntax_map() -> Dict[str, LiteralMatch]:
         `Dict[str, LiteralMatch]`: The literal syntax map.
     """
 
-    return _literal_syntax_map
+    return copy.deepcopy(_literal_syntax_map)
 
 
 def _register_literal_class(literal_class: Type,
@@ -488,7 +510,7 @@ class Operator:
             `UnknownOperatorException`: If the operator is unknown.
         '''
 
-        if char not in VALID_OPERATOR_CHARS:
+        if char not in _get_valid_operator_chars():
             raise exception.UnknownOperatorException(
                 f'Unknown operator: {char}'
             )
@@ -508,6 +530,77 @@ class Operator:
 
         return func(*args)
 
+    @property
+    def precedence(self) -> int:
+        """Gets the operators precedence.
+
+        Returns:
+            `int`: The operators precedence.
+
+        Raises:
+            `UnknownOperatorException`: If the operator is unknown.
+        """
+
+        if self._operator in _LOGICAL_OPERATOR_MAP:
+            return _LOGICAL_OPERATOR_PRECEDENCE
+
+        elif self._operator in _constant_operator_map:
+            return _CONSTANT_OPERATOR_PRECEDENCE
+
+        match = self._get_operator_map_match()
+
+        precedence = match.get('precedence')
+
+        if precedence is None:
+            raise exception.MissingOperatorPrecedenceException(
+                f'Missing operator precedence: {self._operator}'
+            )
+
+        return precedence
+
+    @property
+    def argument_count(self) -> int:
+        """Gets the number of arguments the operator takes.
+
+        Returns:
+            `int`: The number of arguments the operator takes.
+        """
+
+        func = self._get_function()
+
+        return len(inspect.signature(func).parameters)
+
+    @classmethod
+    def is_valid_operator(cls, char: str) -> bool:
+        """Checks if the character is a valid operator.
+
+        Args:
+            char (`str`): The character to check.
+
+        Returns:
+            `bool`: True if the character is a valid operator, False
+                if not.
+        """
+
+        return char in _get_valid_operator_chars()
+
+    @classmethod
+    def string_could_be_operator(cls, string: str) -> bool:
+        """Checks if the string could be an operator.
+
+        Args:
+            string (`str`): The string to check.
+
+        Returns:
+            `bool`: True if the string could be an operator, False if
+                not.
+        """
+
+        return any(
+            operator.startswith(string)
+            for operator in _get_valid_operator_chars()
+        )
+
     def _get_operator_map_match(self) -> LiteralMatch:
         '''Gets the respective operators match.
 
@@ -520,17 +613,17 @@ class Operator:
 
         match = None
 
-        if self._operator in ARITHMETIC_OPERATOR_MAP:
-            match = ARITHMETIC_OPERATOR_MAP[self._operator]
+        if self._operator in _ARITHMETIC_OPERATOR_MAP:
+            match = _ARITHMETIC_OPERATOR_MAP[self._operator]
 
-        elif self._operator in CONSTANT_OPERATOR_MAP:
-            match = CONSTANT_OPERATOR_MAP[self._operator]
+        elif self._operator in _constant_operator_map:
+            match = _constant_operator_map[self._operator]
 
-        elif self._operator in LOGICAL_OPERATOR_MAP:
-            match = LOGICAL_OPERATOR_MAP[self._operator]
+        elif self._operator in _LOGICAL_OPERATOR_MAP:
+            match = _LOGICAL_OPERATOR_MAP[self._operator]
 
-        elif self._operator in KEYWORD_OPERATOR_MAP:
-            match = KEYWORD_OPERATOR_MAP[self._operator]
+        elif self._operator in _KEYWORD_OPERATOR_MAP:
+            match = _KEYWORD_OPERATOR_MAP[self._operator]
 
         # Check a match was found
         if match is None:
@@ -556,77 +649,6 @@ class Operator:
             )
 
         return func
-
-    @classmethod
-    def is_valid_operator(cls, char: str) -> bool:
-        """Checks if the character is a valid operator.
-
-        Args:
-            char (`str`): The character to check.
-
-        Returns:
-            `bool`: True if the character is a valid operator, False
-                if not.
-        """
-
-        return char in VALID_OPERATOR_CHARS
-
-    @classmethod
-    def string_could_be_operator(cls, string: str) -> bool:
-        """Checks if the string could be an operator.
-
-        Args:
-            string (`str`): The string to check.
-
-        Returns:
-            `bool`: True if the string could be an operator, False if
-                not.
-        """
-
-        return any(
-            operator.startswith(string)
-            for operator in VALID_OPERATOR_CHARS
-        )
-
-    @property
-    def precedence(self) -> int:
-        """Gets the operators precedence.
-
-        Returns:
-            `int`: The operators precedence.
-
-        Raises:
-            `UnknownOperatorException`: If the operator is unknown.
-        """
-
-        if self._operator in LOGICAL_OPERATOR_MAP:
-            return LOGICAL_OPERATOR_PRECEDENCE
-
-        elif self._operator in CONSTANT_OPERATOR_MAP:
-            return CONSTANT_OPERATOR_PRECEDENCE
-
-        match = self._get_operator_map_match()
-
-        precedence = match.get('precedence')
-
-        if precedence is None:
-            raise exception.MissingOperatorPrecedenceException(
-                f'Missing operator precedence: {self._operator}'
-            )
-
-        return precedence
-
-    @property
-    def argument_count(self) -> int:
-        """Gets the number of arguments the operator takes.
-
-        Returns:
-            `int`: The number of arguments the operator takes.
-        """
-
-        func = self._get_function()
-
-        return len(inspect.signature(func).parameters)
 
 
 def is_unterminated_literal(value: str) -> bool:
