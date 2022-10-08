@@ -804,7 +804,8 @@ def create_literal(char: str, match: LiteralMatch) -> BaseLiteral:
 
     if not isinstance(value_type, type):
         raise ValueError((
-            f'Invalid value type for literal: {char=}, {value_type=}'
+            f'Invalid value type for literal: char="{char}", '
+            f'value_type="{value_type}"'
         ))
 
     if literal_class is None:
