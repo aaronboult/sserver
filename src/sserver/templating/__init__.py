@@ -27,7 +27,7 @@ def get(template_name: str, app_name: Optional[str]) -> Optional[Template]:
     return Template(template_name, app_name=app_name)
 
 
-def load(template_name: str, context: Dict[Any, Any],
+def render_to_string(template_name: str, context: Dict[Any, Any],
          app_name: Optional[str] = None) -> str:
     """Get and render the given `template` in `app_name`.
 
@@ -60,7 +60,7 @@ def load(template_name: str, context: Dict[Any, Any],
     return renderer.render(context)
 
 
-def register():
+def load():
     """Registers builtin template tags."""
 
     from sserver.templating import template_tag  # noqa: F401

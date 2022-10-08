@@ -40,7 +40,7 @@ class BaseEndpoint(OptionMixin):
         if not isinstance(template_name, str):
             raise TypeError('template_name must be of type str')
 
-        return templating.load(
+        return templating.render_to_string(
             template_name,
             context,
         )
