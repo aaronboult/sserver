@@ -12,7 +12,6 @@ from sserver.templating.register import (
 )
 
 
-# @future Remove comments, format: {# my comment #}
 _COMMENT_TAG_SYNTAX = '{#(.|\n)+#}'
 _LOGIC_TAG_SYNTAX = '{%(.+)%}'
 
