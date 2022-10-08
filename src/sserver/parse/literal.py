@@ -9,7 +9,17 @@ from sserver.parse import exception
 
 
 # Maps string operators onto the operator module functions
-_constant_operator_map = {}
+_constant_operator_map = {
+    'True': {
+        'function': lambda: True,
+    },
+    'False': {
+        'function': lambda: False,
+    },
+    'None': {
+        'function': lambda: None,
+    },
+}
 
 _CONSTANT_OPERATOR_PRECEDENCE = 8
 
@@ -71,6 +81,10 @@ _LOGICAL_OPERATOR_MAP = {
 _LOGICAL_OPERATOR_PRECEDENCE = 4
 
 _KEYWORD_OPERATOR_MAP = {
+    'is': {
+        'function': operator.is_,
+        'precedence': 4,
+    },
     'not': {
         'function': operator.not_,
         'precedence': 3,
