@@ -75,6 +75,8 @@ def render_to_string(template_name: str, context: Dict[Any, Any],
 def load():
     """Registers builtin template tags."""
 
+    # @future Load template tags from apps / project
+
     from sserver.templating import template_tag  # noqa: F401
 
 
