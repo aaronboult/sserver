@@ -6,10 +6,6 @@ class MissingTagArgumentsException(Exception):
     """Raised when a template tag is called with too few arguments."""
 
 
-class TemplateArgumentException(Exception):
-    """Raised when a template argument is invalid."""
-
-
 class UnknownTagException(Exception):
     """Raised when a template tag is called with an unknown tag name."""
 
@@ -24,3 +20,11 @@ class UnknownTagConditionalExpressionException(Exception):
 
 class MissingTagFunctionException(Exception):
     """Raised when a tag function is not found."""
+
+
+class TagAlreadyRegisteredException(Exception):
+    """Raised when a tag is already registered."""
+
+
+class TemplateArgumentException(Exception):
+    """Raised when a template argument is invalid."""

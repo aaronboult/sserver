@@ -1,8 +1,22 @@
 """Template tags called in templates."""
 
 
-from typing import List
+from typing import Any, Dict, List, Optional
 from sserver.templating import exception
+from sserver.templating.register import (
+    register_inline_tag,
+    register_block_tag,
+)
+from sserver.templating.template import Template
+from sserver.templating.template_renderer import (
+    TemplateRenderer,
+    TagLogicBlockContents,
+)
+from sserver.parse.parse import (
+    parse_string_to_value,
+    parse_string_to_object_list,
+    Identifier,
+)
 
 
 # Function to validate the number of arguments passed to a tag
@@ -53,3 +67,154 @@ def validate_args_len(tag_name: str, args: List[str], expected_len:
         )
 
     return True
+
+
+@register_inline_tag('include')
+def include(context: Dict[str, Any], args) -> str:
+    """Includes a template.
+
+    Args:
+        *args (`str`): Arguments passed to the tag.
+
+    Note:
+        Excepts a single string after parsing arguments.
+
+    Raises:
+        `TemplateArgumentException`: If the argument passed is not a
+            string.
+    """
+
+    # Parse the arguments
+    arg_value = parse_string_to_value(context, args)
+
+    if not isinstance(arg_value, str):
+        raise exception.TemplateArgumentException(
+            'include tag expects a single string argument'
+        )
+
+    template_to_include = Template(arg_value).template_str
+
+    if template_to_include is None:
+        template_to_include = ''
+
+    return template_to_include
+
+
+@register_inline_tag('parse')
+def parse(context: Dict[str, Any], args) -> str:
+    """Parses a string.
+
+    Args:
+        *args (`str`): Arguments passed to the tag.
+
+    Note:
+        Excepts a single string after parsing arguments.
+
+    Raises:
+        `TemplateArgumentException`: If the argument passed is not a
+            string.
+    """
+
+    # Parse the arguments
+    return str(parse_string_to_value(context, args))
+
+
+@register_block_tag(
+    tag_name='if',
+    end_tag='endif',
+    sub_tag_list=[
+        'elif',
+        'else',
+    ]
+)
+def conditional_block(context: Dict[str, Any], block_contents:
+                      TagLogicBlockContents, args) -> Optional[str]:
+    """Renders a conditional if statement.
+
+    Args:
+        context (`Dict[str, Any]`): The context to render the block
+            with.
+        block_contents (`_TagLogicBlockContents`): The contents of the
+            block.
+        *args (`str`): Arguments passed to the tag.
+
+    Note:
+        Expects a single boolean value after parsing arguments.
+
+    Returns:
+        `str`: The rendered block.
+    """
+
+    # Parse the arguments
+    conditional_output = parse_string_to_value(context, args)
+
+    if conditional_output is True or conditional_output is None:
+        return block_contents
+
+    return None
+
+
+@register_block_tag(
+    tag_name='for',
+    end_tag='endfor',
+)
+def for_block(context: Dict[str, Any], block_contents:
+              TagLogicBlockContents, args) -> str:
+    """Renders a for loop.
+
+    Note:
+        Expects exactly three arguments after parsing arguments.
+            The first argument being an identifier to assign the
+            current iteration to, the third argument being the
+            iterable to iterate over.
+
+    Args:
+        context (`Dict[str, Any]`): The context to render the block
+            with.
+        block_contents (`_TagLogicBlockContents`): The contents of the
+            block.
+        *args (`str`): Arguments passed to the tag.
+
+    Returns:
+        `str`: The rendered block.
+
+    Raises:
+        `TemplateArgumentException`: If the first argument is not a
+            valid identifier or if the third argument is not a valid
+            iterable.
+    """
+
+    # Parse the arguments
+    args = parse_string_to_object_list(args)
+
+    validate_args_len('for', args, 3)
+
+    # Extract the identifier and iterable
+    identifier = args[0]
+    iterable = args[2].evaluate(context)
+
+    # Ensure identifier and iterable are of correct type
+    if not isinstance(identifier, Identifier):
+        raise exception.TemplateArgumentException(
+            'for tag expects identifier as first argument'
+        )
+
+    if not hasattr(iterable, '__iter__'):
+        raise exception.TemplateArgumentException(
+            'for tag expects iterable as third argument'
+        )
+
+    output = ''
+
+    for item in iterable:
+        template = Template()
+        template.set_template_str(block_contents)
+
+        renderer = TemplateRenderer(template)
+
+        output += renderer.render({
+            **context,
+            identifier.name: item,
+        })
+
+    return output
