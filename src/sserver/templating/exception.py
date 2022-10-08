@@ -6,6 +6,10 @@ class MissingTagArgumentsException(Exception):
     """Raised when a template tag is called with too few arguments."""
 
 
+class TemplateArgumentException(Exception):
+    """Raised when a template argument is invalid."""
+
+
 class UnknownTagException(Exception):
     """Raised when a template tag is called with an unknown tag name."""
 

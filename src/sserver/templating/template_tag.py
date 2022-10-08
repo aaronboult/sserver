@@ -5,7 +5,7 @@ from typing import List
 from sserver.templating import exception
 
 
-# Decorator to validate the number of arguments passed to a tag
+# Function to validate the number of arguments passed to a tag
 def validate_args_len(tag_name: str, args: List[str], expected_len:
                       int) -> bool:
     """Validates the length of the arguments passed to a tag.
@@ -16,6 +16,7 @@ def validate_args_len(tag_name: str, args: List[str], expected_len:
         expected_len (`int`): The expected length of the arguments.
 
     Raises:
+        `TypeError`: If `expected_len` is not an `int`.
         `TooManyTagArgumentsException`: If the number of arguments
             passed to the tag is greater than the expected length.
         `MissingTagArgumentsException`: If the number of arguments

@@ -1,17 +1,20 @@
 """Template renderer."""
 
 import re
-import operator
 from typing import Any, Dict, List, Optional, Tuple
+from sserver.util import log
 from sserver.templating.template import Template
 from sserver.templating import exception
 from sserver.templating.template_tag import validate_args_len
-from sserver.util.parse import (
-    parse_string_to_python,
-    OPERATOR_MAP,
+from sserver.parse.parse import (
+    parse_string_to_value,
+    parse_string_to_object_list,
+    Identifier,
 )
 
 
+# @future Remove comments, format: {# my comment #}
+_COMMENT_TAG_SYNTAX = '{#.+#}'
 _LOGIC_TAG_SYNTAX = '{%(.+)%}'
 
 
@@ -156,7 +159,6 @@ class _TagLogicBlock:
 
         # Get and parse the block arguments
         tag_name, args = _deconstruct_tag(CURRENT_RENDER_MATCH)
-        parsed_args = parse_string_to_python(context, args)
 
         tag_function = _get_tag_function(
             self._tag,
@@ -164,25 +166,8 @@ class _TagLogicBlock:
             sub_tag=tag_name if USING_SUB_TAG else None
         )
 
-        if USING_SUB_TAG:
-            SUB_TAG_DATA = _RENDER_BLOCK_TAGS[self._tag]['sub_tags'][
-                tag_name
-            ]
-
-            # If sub tag does not override tag function, use the
-            # parent
-            if SUB_TAG_DATA.get('tag_function') is not None:
-                tag_function = SUB_TAG_DATA.get('tag_function')
-
-        _try_validate_args_len(
-            self.tag,
-            parsed_args,
-            is_block=True,
-            sub_tag=tag_name if USING_SUB_TAG else None
-        )
-
         tag_output: Optional[str] = tag_function(
-            context, block_contents, *parsed_args
+            context, block_contents, args
         )
 
         # If no output was returned, check for sub tags
@@ -307,16 +292,11 @@ class TemplateRenderer:
             elif tag_name in _RENDER_INLINE_TAGS:
                 # Get the template function and call it passing
                 # parsed args
-                parsed_args = parse_string_to_python(
-                    context,
-                    tag_args
-                )
 
                 tag_function = _get_tag_function(tag_name)
-                _try_validate_args_len(tag_name, parsed_args)
 
                 preprocessed_template_str += tag_function(
-                    context, *parsed_args
+                    context, tag_args
                 )
 
             else:
@@ -367,19 +347,29 @@ class TemplateRenderer:
 
 # Template tag functions
 
-
-def include(context: Dict[str, Any], *args) -> str:
+def include(context: Dict[str, Any], args) -> str:
     """Includes a template.
 
     Args:
         *args (`str`): Arguments passed to the tag.
 
     Note:
-        Expects len(args) == 1 and args[0] to be the template to
-            import.
+        Excepts a single string after parsing arguments.
+
+    Raises:
+        `TemplateArgumentException`: If the argument passed is not a
+            string.
     """
 
-    template_to_include = Template(args[0]).template_str
+    # Parse the arguments
+    arg_value = parse_string_to_value(context, args)
+
+    if not isinstance(arg_value, str):
+        raise exception.TemplateArgumentException(
+            'include tag expects a single string argument'
+        )
+
+    template_to_include = Template(arg_value).template_str
 
     if template_to_include is None:
         template_to_include = ''
@@ -388,7 +378,7 @@ def include(context: Dict[str, Any], *args) -> str:
 
 
 def conditional_block(context: Dict[str, Any], block_contents:
-                      _TagLogicBlockContents, *args) -> Optional[str]:
+                      _TagLogicBlockContents, args) -> Optional[str]:
     """Renders a conditional if statement.
 
     Args:
@@ -399,43 +389,30 @@ def conditional_block(context: Dict[str, Any], block_contents:
         *args (`str`): Arguments passed to the tag.
 
     Note:
-        Expects args[0] and args[2] to be the left and right operands,
-            respectively, and args[1] to be the operator.
-
-    Raises:
-        `UnknownTagConditionalExpressionException`: If the conditional
-            expression is not recognized.
+        Expects a single boolean value after parsing arguments.
 
     Returns:
         `str`: The rendered block.
     """
 
-    if len(args) == 0:
-        return block_contents
+    # Parse the arguments
+    conditional_output = parse_string_to_value(context, args)
 
-    left_expression = args[0]
-    operator = args[1]
-    right_expression = args[2]
-
-    if operator not in OPERATOR_MAP:
-        raise exception.UnknownTagConditionalExpressionException(
-            f'Unknown operator {operator}'
-        )
-
-    conditional_output = OPERATOR_MAP[operator](
-        left_expression,
-        right_expression
-    )
-
-    if conditional_output:
+    if conditional_output == True or conditional_output is None:
         return block_contents
 
     return None
 
 
 def for_block(context: Dict[str, Any], block_contents:
-              _TagLogicBlockContents, *args) -> str:
+              _TagLogicBlockContents, args) -> str:
     """Renders a for loop.
+
+    Note:
+        Expects exactly three arguments after parsing arguments.
+            The first argument being an identifier to assign the
+            current iteration to, the third argument being the
+            iterable to iterate over.
 
     Args:
         context (`Dict[str, Any]`): The context to render the block
@@ -446,12 +423,34 @@ def for_block(context: Dict[str, Any], block_contents:
 
     Returns:
         `str`: The rendered block.
+
+    Raises:
+        `TemplateArgumentException`: If the first argument is not a
+            valid identifier or if the third argument is not a valid
+            iterable.
     """
 
-    output = ''
+    # Parse the arguments
+    args = parse_string_to_object_list(args)
 
+    validate_args_len('for', args, 3)
+
+    # Extract the identifier and iterable
     identifier = args[0]
-    iterable = args[2]
+    iterable = args[2].evaluate(context)
+
+    # Ensure identifier and iterable are of correct type
+    if not isinstance(identifier, Identifier):
+        raise exception.TemplateArgumentException(
+            'for tag expects identifier as first argument'
+        )
+
+    if not hasattr(iterable, '__iter__'):
+        raise exception.TemplateArgumentException(
+            'for tag expects iterable as third argument'
+        )
+
+    output = ''
 
     for item in iterable:
         template = Template()
@@ -461,7 +460,7 @@ def for_block(context: Dict[str, Any], block_contents:
 
         output += renderer.render({
             **context,
-            identifier: item,
+            identifier.name: item,
         })
 
     return output
@@ -469,20 +468,14 @@ def for_block(context: Dict[str, Any], block_contents:
 
 _RENDER_BLOCK_TAGS = {
     'if': {
-        'sub_tags': {
-            'elif': {
-                'args_len': 3,
-            },
-            'else': {
-                'args_len': 0,
-            },
-        },
-        'args_len': 3,
+        'sub_tags': [
+            'elif',
+            'else',
+        ],
         'end_tag': 'endif',
         'tag_function': conditional_block,
     },
     'for': {
-        'args_len': 3,
         'end_tag': 'endfor',
         'tag_function': for_block,
     }
@@ -490,7 +483,6 @@ _RENDER_BLOCK_TAGS = {
 
 _RENDER_INLINE_TAGS = {
     'include': {
-        'args_len': 1,
         'tag_function': include,
     },
 }
@@ -524,14 +516,19 @@ def _get_tag_function(tag_name: str, is_block: bool = False,
     tag_function = tag_data[tag_name].get('tag_function')
 
     if sub_tag is not None:
-        if sub_tag not in tag_data[tag_name]['sub_tags']:
+        sub_tag_data = tag_data[tag_name].get('sub_tags', [])
+
+        if sub_tag not in sub_tag_data:
             raise exception.UnknownTagException(
                 f'Unknown sub tag {sub_tag} for tag {tag_name}'
             )
 
-        sub_tag_function = tag_data[tag_name]['sub_tags'][sub_tag].get(
-            'tag_function'
-        )
+        sub_tag_function = None
+
+        if isinstance(sub_tag_data, dict):
+            sub_tag_function = tag_data[tag_name]['sub_tags'][sub_tag].get(
+                'tag_function'
+            )
 
         if sub_tag_function is not None:
             tag_function = sub_tag_function
@@ -542,54 +539,3 @@ def _get_tag_function(tag_name: str, is_block: bool = False,
         )
 
     return tag_function
-
-
-def _try_validate_args_len(tag_name: str, args: List[Any],
-                           is_block: bool = False,
-                           sub_tag: Optional[str] = None) -> bool:
-    """Tries to validate the length of the arguments passed to a tag.
-
-    Args:
-        tag_name (`str`): The name of the tag.
-        args (`List[Any]`): The arguments passed to the tag.
-        is_block (`bool`): Whether the tag is a block tag.
-        sub_tag (`str`, optional): The sub tag, if any.
-
-    Returns:
-        `bool`: Whether the number of arguments passed to the tag is
-            valid.
-
-    Raises:
-        `UnknownTagException`: If the tag is not recognized.
-    """
-
-    tag_data = (
-        _RENDER_BLOCK_TAGS if is_block
-        else _RENDER_INLINE_TAGS
-    )
-
-    if tag_name not in tag_data:
-        raise exception.UnknownTagException(f'Unknown tag {tag_name}')
-
-    if sub_tag is not None:
-        tag_data = tag_data[tag_name]['sub_tags']
-
-        if sub_tag not in tag_data:
-            raise exception.UnknownTagException(
-                f'Unknown sub tag {sub_tag}'
-            )
-
-        tag_name = sub_tag
-
-    expected_args_len = tag_data[tag_name].get(
-        'args_len'
-    )
-
-    if expected_args_len is not None:
-        validate_args_len(
-            tag_name,
-            args,
-            expected_args_len
-        )
-
-    return True
