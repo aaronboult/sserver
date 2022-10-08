@@ -58,3 +58,9 @@ def load(template_name: str, context: Dict[Any, Any],
     renderer = TemplateRenderer(template_obj)
 
     return renderer.render(context)
+
+
+def register():
+    """Registers builtin template tags."""
+
+    from sserver.templating import template_tag
