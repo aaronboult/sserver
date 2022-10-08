@@ -1,8 +1,7 @@
 """Template renderer."""
 
 import re
-from typing import Any, Dict, List, Optional, Tuple
-from sserver.util import log
+from typing import Any, Dict, Optional, Tuple
 from sserver.templating.template import Template
 from sserver.templating import exception
 from sserver.templating.template_tag import validate_args_len
@@ -345,6 +344,7 @@ class TemplateRenderer:
 
         return self._render_raw(context).format(**context)
 
+
 # Template tag functions
 
 def include(context: Dict[str, Any], args) -> str:
@@ -398,7 +398,7 @@ def conditional_block(context: Dict[str, Any], block_contents:
     # Parse the arguments
     conditional_output = parse_string_to_value(context, args)
 
-    if conditional_output == True or conditional_output is None:
+    if conditional_output is True or conditional_output is None:
         return block_contents
 
     return None

@@ -5,7 +5,6 @@ import math
 import inspect
 import operator
 from typing import Any, Dict, Optional, Tuple, Type, Union
-from sserver.util import log
 from sserver.parse import exception
 
 
@@ -19,19 +18,19 @@ CONSTANT_OPERATOR_MAP = {
 CONSTANT_OPERATOR_PRECEDENCE = 8
 
 ARITHMETIC_OPERATOR_MAP = {
-    '+' : {
+    '+': {
         'function': operator.add,
         'precedence': 5,
     },
-    '-' : {
+    '-': {
         'function': operator.sub,
         'precedence': 5,
     },
-    '*' : {
+    '*': {
         'function': operator.mul,
         'precedence': 6,
     },
-    '/' : {
+    '/': {
         'function': operator.truediv,
         'precedence': 6,
     },
@@ -39,7 +38,7 @@ ARITHMETIC_OPERATOR_MAP = {
         'function': operator.floordiv,
         'precedence': 6,
     },
-    '%' : {
+    '%': {
         'function': operator.mod,
         'precedence': 6,
     },
@@ -330,8 +329,8 @@ class BaseLiteral(Evaluatable):
         return f'<{self.__class__.__name__}, value: {self._value}>'
 
     def _append_literal_match(self, char: str, position: int, match:
-                             LiteralMatch
-                             ) -> bool:
+                              LiteralMatch
+                              ) -> bool:
         """Appends a literal match to the literal value.
 
         Note:
@@ -359,7 +358,7 @@ class BaseLiteral(Evaluatable):
         )
 
     def _append_character(self, char: str, position: int
-                         ) -> Tuple[bool, bool]:
+                          ) -> Tuple[bool, bool]:
         """Appends a character to the literal value.
 
         Args:

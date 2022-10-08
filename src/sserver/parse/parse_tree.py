@@ -1,8 +1,6 @@
 """Definitions for a parse tree."""
 
-import inspect
 from typing import Any, List, Optional
-from sserver.util import log
 from sserver.parse import exception
 from sserver.parse.literal import (
     Evaluatable,
@@ -39,8 +37,6 @@ class Expression(Evaluatable):
             `Any`: The value of the expression. If the expression is
                 empty, `None` is returned.
         """
-
-        value = None
 
         # If only a single item was in the expression, that is the
         # expressions evaluated value
@@ -90,10 +86,6 @@ class ParseTree:
                 used.
         """
 
-        # @issuefix If an operator is the final item in the expression,
-        # @issuefix it remains an identifier
-        log.log('items', self.expression)
-
         # First evaluate all literals, identifiers and expressions
         # in the expression
         evaluated_items = list(
@@ -104,8 +96,6 @@ class ParseTree:
                 self.expression
             )
         )
-
-        log.log('evaluated items', evaluated_items)
 
         # Next, create create a list of operatrs and their index
         # in order of precedence (highest to lowest)
@@ -121,11 +111,8 @@ class ParseTree:
             reverse=True
         )
 
-        log.log('operator_matches', operator_matches)
-
         # Using the sorted operators, calculate the expression value
         for index, operator in operator_matches:
-            log.log('evaluated items', evaluated_items)
             # First get the number of expected arguments for the
             # operator
             # @note expected_args of 1 always defaults to a right arg
@@ -199,7 +186,6 @@ class ParseTree:
 
                 if operator_list_index > index:
                     operator_match[0] -= expected_args
-        log.log('evaluated items', evaluated_items)
 
         # If there are no evaluated items, return None
         if len(evaluated_items) == 0:
@@ -207,13 +193,6 @@ class ParseTree:
 
         # Check the evaluated items length is now 1
         if len(evaluated_items) != 1:
-            reconstructed_expression = ' '.join(
-                map(
-                    lambda item: str(item),
-                    self.expression
-                )
-            )
-
             raise exception.ExpressionSyntaxException((
                 f'Expression "{self._get_reconstructed_expression()}"'
                 ' is not valid'

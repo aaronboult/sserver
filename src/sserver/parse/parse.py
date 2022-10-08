@@ -3,7 +3,6 @@
 # of from sserver.parse.parse import ...
 
 from typing import Any, List, Optional, Tuple, Union
-from sserver.util import log
 from sserver.parse.parse_tree import Expression
 from sserver.parse import exception
 from sserver.parse.literal import (
@@ -29,8 +28,8 @@ class StringLiteral(BaseLiteral):
     """Represents a string literal value."""
 
     def _append_literal_match(self, char: str, position: int, match:
-                             LiteralMatch
-                             ):
+                              LiteralMatch
+                              ):
         """Appends a literal match to the literal value.
 
         Args:
@@ -65,7 +64,7 @@ class NumericLiteral(BaseLiteral):
         self._value += char
 
     def _append_character(self, char: str, position: int
-                         ) -> Tuple[bool, bool]:
+                          ) -> Tuple[bool, bool]:
         """Appends a character to the literal value.
 
         Args:
@@ -102,8 +101,8 @@ class EnclosingLiteral(BaseLiteral):
     """Represents a literal that encloses a value or values."""
 
     def _append_literal_match(self, char: str, position: int, match:
-                             LiteralMatch
-                             ):
+                              LiteralMatch
+                              ):
         """Appends a literal match to the literal value.
 
         Note:
@@ -171,7 +170,7 @@ class ListLiteral(EnclosingLiteral):
         return output
 
     def _append_character(self, char: str, position: int
-                         ) -> Tuple[bool, bool]:
+                          ) -> Tuple[bool, bool]:
         """Appends a character to the literal value.
 
         Args:
@@ -562,7 +561,7 @@ def parse_string_to_object_list(args: str):
 
 
 def parse_string_to_value(context: Context, args: str
-                           ) -> Optional[Any]:
+                          ) -> Optional[Any]:
     """Parse the passed `args`string  into a value.
 
     Args:
