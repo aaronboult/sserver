@@ -28,7 +28,7 @@ def get(template_name: str, app_name: Optional[str]) -> Optional[Template]:
 
 
 def render_to_string(template_name: str, context: Dict[Any, Any],
-         app_name: Optional[str] = None) -> str:
+                     app_name: Optional[str] = None) -> str:
     """Get and render the given `template` in `app_name`.
 
     Args:
