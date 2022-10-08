@@ -4,10 +4,10 @@
 from typing import Any, Dict, Optional
 from sserver.templating.template import Template
 from sserver.templating.template_renderer import TemplateRenderer
-from sserver.templating.template_renderer import (  # noqa: F401
+from sserver.templating.template_renderer import (
     BlockTagContents
 )
-from sserver.templating.register import (  # noqa F401
+from sserver.templating.register import (
     register_inline_tag,
     register_block_tag,
 )
@@ -17,7 +17,8 @@ from sserver.templating.register import (  # noqa F401
 Context = Dict[str, Any]
 
 
-def get(template_name: str, app_name: Optional[str]) -> Optional[Template]:
+def get_template(template_name: str, app_name: Optional[str]
+                 ) -> Optional[Template]:
     """Get a template from `app_name` with name
     `template_name`.
 
@@ -65,7 +66,7 @@ def render_to_string(template_name: str, context: Dict[Any, Any],
     if app_name is not None and not isinstance(app_name, str):
         raise TypeError('app_name must be of type str or None')
 
-    template_obj = get(template_name, app_name=app_name)
+    template_obj = get_template(template_name, app_name=app_name)
     renderer = TemplateRenderer(template_obj)
 
     return renderer.render(context)
@@ -75,3 +76,15 @@ def load():
     """Registers builtin template tags."""
 
     from sserver.templating import template_tag  # noqa: F401
+
+
+__all__ = [
+    'Context',
+    'Template',
+    'TemplateRenderer',
+    'BlockTagContents',
+    'register_inline_tag',
+    'register_block_tag',
+    'get_template',
+    'render_to_string',
+]
