@@ -519,11 +519,11 @@ class Operator:
     """Represents an arithmetic or logical operator."""
 
     def __init__(self, char: str):
-        '''Initializes the operator.
+        """Initializes the operator.
 
         Raises:
             `UnknownOperatorException`: If the operator is unknown.
-        '''
+        """
 
         if char not in _get_valid_operator_chars():
             raise exception.UnknownOperatorException(
@@ -539,7 +539,7 @@ class Operator:
         )
 
     def __call__(self, *args):
-        '''Calls the operator function.'''
+        """Calls the operator function."""
 
         func = self._get_function()
 
@@ -617,14 +617,14 @@ class Operator:
         )
 
     def _get_operator_map_match(self) -> LiteralMatch:
-        '''Gets the respective operators match.
+        """Gets the respective operators match.
 
         Returns:
             `LiteralMatch`: The operators respecive match.
 
         Raises:
             `UnknownOperatorException`: If the operator is unknown.
-        '''
+        """
 
         match = None
 
@@ -649,11 +649,11 @@ class Operator:
         return match
 
     def _get_function(self) -> callable:
-        '''Gets the operator function.
+        """Gets the operator function.
 
         Returns:
             `callable`: The operator function.
-        '''
+        """
 
         match = self._get_operator_map_match()
         func = match.get('function')
