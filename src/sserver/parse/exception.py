@@ -9,6 +9,10 @@ class UnknownOperatorException(Exception):
     """Raised when an unknown operator is encountered."""
 
 
+class OperatorAlreadyExistsException(Exception):
+    """Raised when an operator already exists."""
+
+
 class ExpressionSyntaxException(Exception):
     """Raised when invalid expression syntax is encountered."""
 
