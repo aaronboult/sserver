@@ -522,9 +522,14 @@ def parse_string_to_object_list(args: str):
             ))
 
     # If parsing concluded with an operator in progress, check if it
-    # is a valid identifier
+    # is a valid operator or identifier
     if current_operator is not None:
-        if current_operator.isidentifier():
+        if Operator.is_valid_operator(current_operator):
+            parsed_args.append(
+                Operator(current_operator)
+            )
+
+        elif current_operator.isidentifier():
             parsed_args.append(
                 Identifier(current_operator)
             )
