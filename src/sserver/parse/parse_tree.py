@@ -9,6 +9,7 @@ from sserver.parse.literal import (
 )
 
 
+# Alias for expression item
 ExpressionItem = Union[Operator, Evaluatable]
 
 
@@ -68,6 +69,13 @@ class ParseTree:
     """Represents a parse tree following operator precedence."""
 
     def __init__(self, expression: Expression):
+        # Ensure the given expression is an expression object
+        if not isinstance(expression, Expression):
+            raise TypeError((
+                'expression must be of type Expression '
+                f'not {type(expression)}'
+            ))
+
         self.expression = expression
 
     def __repr__(self) -> str:
