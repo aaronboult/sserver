@@ -1,19 +1,23 @@
 """Definitions for a parse tree."""
 
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 from sserver.parse import exception
 from sserver.parse.literal import (
     Evaluatable,
     Operator,
     Context
 )
+from sserver.util import log
+
+
+ExpressionItem = Union[Operator, Evaluatable]
 
 
 class Expression(Evaluatable):
     """Represents an expression."""
 
-    def __init__(self, items: List[Evaluatable]):
-        self._items: List[Evaluatable] = items
+    def __init__(self, items: List[ExpressionItem]):
+        self._items: List[ExpressionItem] = items
 
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__}, items: {self._items}>'
@@ -21,7 +25,7 @@ class Expression(Evaluatable):
     def __iter__(self):
         return iter(self._items)
 
-    def __getitem__(self, index: int) -> Evaluatable:
+    def __getitem__(self, index: int) -> ExpressionItem:
         return self._items[index]
 
     def __len__(self) -> int:
@@ -41,7 +45,21 @@ class Expression(Evaluatable):
         # If only a single item was in the expression, that is the
         # expressions evaluated value
         if len(self._items) == 1:
-            return self._items[0].evaluate(context)
+            item = self._items[0]
+
+            # If the item is an evaluatable, evaluate it
+            if isinstance(item, Evaluatable):
+                return item.evaluate(context)
+
+            # Check if the operator is a constant
+            if item.argument_count == 0:
+                # If the item is a constant call it to get the value
+                return item()
+
+            # If the operator is not a constant, it is not evaluable
+            raise exception.ExpressionSyntaxException(
+                f'Unexpected operator: {item}'
+            )
 
         # Construct a parse tree and get its value
         return ParseTree(self).evaluate(context)
