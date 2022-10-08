@@ -3,11 +3,11 @@
 
 from typing import Any, Dict, Optional
 from sserver.templating.template import Template
-from sserver.templating.template_renderer import (
-    TemplateRenderer,
-    BlockTagContents,
+from sserver.templating.template_renderer import TemplateRenderer
+from sserver.templating.template_renderer import (  # noqa: F401
+    BlockTagContents
 )
-from sserver.templating.register import (
+from sserver.templating.register import (  # noqa F401
     register_inline_tag,
     register_block_tag,
 )
