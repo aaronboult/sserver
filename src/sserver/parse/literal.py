@@ -766,8 +766,10 @@ def create_literal(char: str, match: LiteralMatch) -> BaseLiteral:
     value_type = match.get('value_type')
     literal_class = match.get('literal_class')
 
-    if isinstance(value_type, type):
-        raise ValueError(f'Invalid value type for literal: {char}')
+    if not isinstance(value_type, type):
+        raise ValueError((
+            f'Invalid value type for literal: {char=}, {value_type=}'
+        ))
 
     if literal_class is None:
         raise exception.UnknownLiteralTypeException(
