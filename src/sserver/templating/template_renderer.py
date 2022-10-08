@@ -377,6 +377,24 @@ def include(context: Dict[str, Any], args) -> str:
     return template_to_include
 
 
+def parse(context: Dict[str, Any], args) -> str:
+    """Parses a string.
+
+    Args:
+        *args (`str`): Arguments passed to the tag.
+
+    Note:
+        Excepts a single string after parsing arguments.
+
+    Raises:
+        `TemplateArgumentException`: If the argument passed is not a
+            string.
+    """
+
+    # Parse the arguments
+    return str(parse_string_to_value(context, args))
+
+
 def conditional_block(context: Dict[str, Any], block_contents:
                       _TagLogicBlockContents, args) -> Optional[str]:
     """Renders a conditional if statement.
@@ -466,6 +484,7 @@ def for_block(context: Dict[str, Any], block_contents:
     return output
 
 
+# @future Allow registering custom template tags
 _RENDER_BLOCK_TAGS = {
     'if': {
         'sub_tags': [
@@ -484,6 +503,9 @@ _RENDER_BLOCK_TAGS = {
 _RENDER_INLINE_TAGS = {
     'include': {
         'tag_function': include,
+    },
+    'parse': {
+        'tag_function': parse,
     },
 }
 
