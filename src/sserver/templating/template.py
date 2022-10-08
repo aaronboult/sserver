@@ -3,7 +3,7 @@
 from typing import Optional
 from os import sep
 from os.path import join, exists, isfile, normpath
-from sserver.util import log, config
+from sserver.util import config
 
 
 class Template:
@@ -70,12 +70,6 @@ class Template:
             TEMPLATE_FOLDER,
             template_name
         )
-
-        log.log('app_name', app_name)
-        log.log('template_name', template_name)
-        log.log('APP_FOLDER', APP_FOLDER)
-        log.log('TEMPLATE_FOLDER', TEMPLATE_FOLDER)
-        log.log('TEMPLATE_PATH', TEMPLATE_PATH)
 
         template_str = None
 

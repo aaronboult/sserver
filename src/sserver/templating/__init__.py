@@ -3,7 +3,18 @@
 
 from typing import Any, Dict, Optional
 from sserver.templating.template import Template
-from sserver.templating.template_renderer import TemplateRenderer
+from sserver.templating.template_renderer import (
+    TemplateRenderer,
+    BlockTagContents,
+)
+from sserver.templating.register import (
+    register_inline_tag,
+    register_block_tag,
+)
+
+
+# Alias for context
+Context = Dict[str, Any]
 
 
 def get(template_name: str, app_name: Optional[str]) -> Optional[Template]:

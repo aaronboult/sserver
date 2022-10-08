@@ -2,8 +2,10 @@
 
 import re
 from typing import Any, Dict, Optional, Tuple
-from sserver.templating.template import Template
-from sserver.templating import exception
+from sserver.templating import (
+    Template,
+    exception,
+)
 from sserver.templating.register import (
     tag_is_inline,
     tag_is_block,
@@ -152,7 +154,7 @@ class _TagLogicBlock:
                 NEXT_SUB_TAG_INDEX
             ].span()
 
-        block_contents = TagLogicBlockContents(
+        block_contents = BlockTagContents(
             template_str[
                 start_tag_end:end_tag_start
             ].strip()
@@ -191,8 +193,8 @@ class _TagLogicBlock:
         return nested_raw_contents, end_tag_end
 
 
-class TagLogicBlockContents(str):
-    """Contents of a tag logic block."""
+class BlockTagContents(str):
+    """Contents of a block tag."""
 
     def render(self, context: Dict[str, Any]) -> str:
         """Renders the contents of the block.

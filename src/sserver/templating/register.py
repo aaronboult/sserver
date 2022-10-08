@@ -11,6 +11,7 @@ _inline_tag_map = {}
 _block_tag_map = {}
 
 
+# Alias for tag match
 TagMatch = Dict[str, Union[str, callable]]
 
 

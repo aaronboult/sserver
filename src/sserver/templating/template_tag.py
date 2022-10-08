@@ -1,16 +1,15 @@
 """Template tags called in templates."""
 
 
-from typing import Any, Dict, List, Optional
-from sserver.templating import exception
-from sserver.templating.register import (
+from typing import List, Optional
+from sserver.templating import (
+    Context,
     register_inline_tag,
     register_block_tag,
-)
-from sserver.templating.template import Template
-from sserver.templating.template_renderer import (
+    Template,
     TemplateRenderer,
-    TagLogicBlockContents,
+    BlockTagContents,
+    exception,
 )
 from sserver.parse.parse import (
     parse_string_to_value,
@@ -70,7 +69,7 @@ def validate_args_len(tag_name: str, args: List[str], expected_len:
 
 
 @register_inline_tag('include')
-def include(context: Dict[str, Any], args) -> str:
+def include(context: Context, args) -> str:
     """Includes a template.
 
     Args:
@@ -101,7 +100,7 @@ def include(context: Dict[str, Any], args) -> str:
 
 
 @register_inline_tag('parse')
-def parse(context: Dict[str, Any], args) -> str:
+def parse(context: Context, args) -> str:
     """Parses a string.
 
     Args:
@@ -127,12 +126,12 @@ def parse(context: Dict[str, Any], args) -> str:
         'else',
     ]
 )
-def conditional_block(context: Dict[str, Any], block_contents:
-                      TagLogicBlockContents, args) -> Optional[str]:
+def conditional_block(context: Context, block_contents:
+                      BlockTagContents, args) -> Optional[str]:
     """Renders a conditional if statement.
 
     Args:
-        context (`Dict[str, Any]`): The context to render the block
+        context (`Context`): The context to render the block
             with.
         block_contents (`_TagLogicBlockContents`): The contents of the
             block.
@@ -158,8 +157,8 @@ def conditional_block(context: Dict[str, Any], block_contents:
     tag_name='for',
     end_tag='endfor',
 )
-def for_block(context: Dict[str, Any], block_contents:
-              TagLogicBlockContents, args) -> str:
+def for_block(context: Context, block_contents:
+              BlockTagContents, args) -> str:
     """Renders a for loop.
 
     Note:
@@ -169,7 +168,7 @@ def for_block(context: Dict[str, Any], block_contents:
             iterable to iterate over.
 
     Args:
-        context (`Dict[str, Any]`): The context to render the block
+        context (`Context`): The context to render the block
             with.
         block_contents (`_TagLogicBlockContents`): The contents of the
             block.
