@@ -13,7 +13,7 @@ from sserver.templating.register import (
 
 
 # @future Remove comments, format: {# my comment #}
-_COMMENT_TAG_SYNTAX = '{#.+#}'
+_COMMENT_TAG_SYNTAX = '{#(.|\n)+#}'
 _LOGIC_TAG_SYNTAX = '{%(.+)%}'
 
 
@@ -325,6 +325,9 @@ class TemplateRenderer:
         """
 
         template_str = self._template.template_str
+
+        # Remove comments
+        template_str = re.sub(_COMMENT_TAG_SYNTAX, '', template_str)
 
         # Preprocess the template string
         template_str = self._preprocess(template_str, context)
