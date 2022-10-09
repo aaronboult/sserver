@@ -1,4 +1,5 @@
 from typing import Callable, Dict, List, Optional
+from sserver import templating
 from sserver.mixin.option_mixin import OptionMixin
 from sserver.endpoint import route
 from sserver.util import log, cache, config
@@ -224,3 +225,4 @@ log.info('Loading config, route and static...')
 config.load()
 route.load()
 static.load()
+templating.load()

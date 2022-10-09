@@ -3,7 +3,7 @@
 from typing import Any, Dict, Union
 from sserver.mixin.option_mixin import OptionMixin
 from sserver.util import config, module
-from sserver.endpoint import template
+from sserver import templating
 
 
 class BaseEndpoint(OptionMixin):
@@ -33,15 +33,14 @@ class BaseEndpoint(OptionMixin):
 
         template_name = getattr(self, 'template_name', None)
 
-        # Empty response if no template_name set
+        # Return context if no template_name set
         if template_name is None:
             return context
 
         if not isinstance(template_name, str):
             raise TypeError('template_name must be of type str')
 
-        return template.load(
-            self.get_app_name(),
+        return templating.render_to_string(
             template_name,
             context,
         )
