@@ -1,9 +1,8 @@
 """Template tags called in templates."""
 
 
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from sserver.templating import (
-    Context,
     register_inline_tag,
     register_block_tag,
     Template,
@@ -11,10 +10,11 @@ from sserver.templating import (
     BlockTagContents,
     exception,
 )
-from sserver.parse.parse import (
+from sserver.parse import (
     parse_string_to_value,
-    parse_string_to_object_list,
+    parse_string_to_expression,
     Identifier,
+    Context,
 )
 
 
@@ -184,7 +184,7 @@ def for_block(context: Context, block_contents:
     """
 
     # Parse the arguments
-    args = parse_string_to_object_list(args)
+    args = parse_string_to_expression(args)
 
     validate_args_len('for', args, 3)
 

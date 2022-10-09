@@ -3,9 +3,9 @@
 
 from typing import Any, Dict, Optional
 from sserver.templating.template import Template
-from sserver.templating.template_renderer import TemplateRenderer
 from sserver.templating.template_renderer import (
-    BlockTagContents
+    TemplateRenderer,
+    BlockTagContents,
 )
 from sserver.templating.register import (
     register_inline_tag,
