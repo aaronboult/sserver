@@ -33,62 +33,63 @@ def load():
     for APP in APP_DIRECTORY_LIST:
 
         # Get app static config
-        APP_CONFIG = config.get_app_config(APP)
+        APP_CONFIG = config.get_app_config(APP, use_default=True)
+        APP_PATH = os.path.join(APP_FOLDER, APP)
 
-        if APP_CONFIG is not None:
-            APP_PATH = os.path.join(APP_FOLDER, APP)
+        # Resolve static paths
+        PATH_TO_CLONE_LIST = [
+            os.path.join(APP_PATH, APP_CONFIG.get('static_image_folder')),
+            os.path.join(APP_PATH, APP_CONFIG.get('static_css_folder')),
+            os.path.join(APP_PATH, APP_CONFIG.get('static_js_folder')),
+        ]
 
-            # Resolve static paths
-            PATH_TO_CLONE_LIST = [
-                os.path.join(APP_PATH, APP_CONFIG.get('static_image_folder')),
-                os.path.join(APP_PATH, APP_CONFIG.get('static_css_folder')),
-                os.path.join(APP_PATH, APP_CONFIG.get('static_js_folder')),
-            ]
+        for PATH_TO_CLONE in PATH_TO_CLONE_LIST:
 
-            for PATH_TO_CLONE in PATH_TO_CLONE_LIST:
+            STATIC_PATH = os.path.join(STATIC_FOLDER, PATH_TO_CLONE)
 
-                STATIC_PATH = os.path.join(STATIC_FOLDER, PATH_TO_CLONE)
+            # Ensure static folder for app exists
+            if not os.path.isdir(STATIC_PATH):
+                os.makedirs(STATIC_PATH)
 
-                # Ensure static folder for app exists
-                if not os.path.isdir(STATIC_PATH):
-                    os.makedirs(STATIC_PATH)
+            # Iterate over files and copy to static folder
+            # Preserve subdirectory structure
+            for ROOT, _, FILE_LIST in os.walk(PATH_TO_CLONE):
+                for FILE in FILE_LIST:
+                    FILE_PATH = os.path.join(ROOT, FILE)
+                    RELATIVE_PATH = os.path.relpath(
+                        FILE_PATH,
+                        PATH_TO_CLONE,
+                    )
 
-                # Iterate over files and copy to static folder
-                # Preserve subdirectory structure
-                for ROOT, _, FILE_LIST in os.walk(PATH_TO_CLONE):
-                    for FILE in FILE_LIST:
-                        FILE_PATH = os.path.join(ROOT, FILE)
-                        RELATIVE_PATH = os.path.relpath(
-                            FILE_PATH,
-                            PATH_TO_CLONE,
-                        )
+                    # @future Config value for copying static files to different directory
+                    # # Ensure file directory exists in static folder
+                    # STATIC_FILE_DESTINATION = os.path.join(
+                    #     STATIC_PATH,
+                    #     RELATIVE_PATH,
+                    # )
+                    # STATIC_FILE_DESTINATION_DIR = os.path.dirname(
+                    #     STATIC_FILE_DESTINATION
+                    # )
 
-                        # Ensure file directory exists in static folder
-                        STATIC_FILE_DESTINATION = os.path.join(
-                            STATIC_PATH,
-                            RELATIVE_PATH,
-                        )
-                        STATIC_FILE_DESTINATION_DIR = os.path.dirname(
-                            STATIC_FILE_DESTINATION
-                        )
+                    # if not os.path.isdir(STATIC_FILE_DESTINATION_DIR):
+                    #     os.makedirs(
+                    #         os.path.dirname(STATIC_FILE_DESTINATION)
+                    #     )
 
-                        if not os.path.isdir(STATIC_FILE_DESTINATION_DIR):
-                            os.makedirs(
-                                os.path.dirname(STATIC_FILE_DESTINATION)
-                            )
+                    # static_file_path = copy(
+                    #     FILE_PATH,
+                    #     STATIC_FILE_DESTINATION,
+                    # )
 
-                        static_file_path = copy(
-                            FILE_PATH,
-                            STATIC_FILE_DESTINATION,
-                        )
+                    # Add to static path map
+                    static_file_key = os.path.join(
+                        PATH_TO_CLONE,
+                        RELATIVE_PATH,
+                    ).replace(APP_FOLDER, '')
 
-                        # Add to static path map
-                        static_file_key = os.path.join(
-                            PATH_TO_CLONE,
-                            RELATIVE_PATH,
-                        ).replace(APP_FOLDER, '')
+                    static_path_map[static_file_key] = FILE_PATH
 
-                        static_path_map[static_file_key] = static_file_path
+    log.info('Static Path Map', static_path_map)
 
     cache.set('__static__', static_path_map)
 
@@ -101,6 +102,11 @@ def get_static_file_path(path: str) -> str:
     """
 
     static_path = cache.get('__static__').get(path)
+
+    # If no static file was found, reload files in an attempt to find it
+    if static_path is None:
+        load()
+        static_path = cache.get('__static__').get(path)
 
     return static_path
 

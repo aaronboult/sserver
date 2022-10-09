@@ -146,9 +146,6 @@ def load(filename: str = 'config.ini', include_default_config: bool = True):
                     **app_level_config,
                 }
 
-            log.log('app', APP)
-            log.log('loaded', config[APP])
-
             # Add app to package manifest
             config_package_manifest.append(APP)
 
@@ -310,7 +307,7 @@ def nested_get(*key_list: str, default: Any = None,
     return default if value is None else value
 
 
-def get_app_config(app_name: str
+def get_app_config(app_name: str, use_default: bool = False
                    ) -> Dict[Any, Union[str, int, float, bool]]:
     """Get the config for app with name `app_name`.
 
@@ -329,4 +326,13 @@ def get_app_config(app_name: str
     if not isinstance(app_name, str):
         raise TypeError('app_name must be of type str')
 
-    return cache.get(__CONFIG_CACHE_KEY).get(app_name)
+    if not isinstance(use_default, bool):
+        raise TypeError('use_default must be of type bool')
+
+    config = cache.get(__CONFIG_CACHE_KEY).get(app_name)
+
+    if config is None and use_default:
+        # A shallow copy is valid here as app configs are never nested
+        config = __APP_DEFAULT_CONFIG.copy()
+
+    return config
