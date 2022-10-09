@@ -194,6 +194,7 @@ class ParenthesisLiteral(EnclosingLiteral):
     def evaluate(self, context: Context) -> Any:
         return parse_string_to_value(context, self._value)
 
+
 # Expose literal classes and functions
 __all__ = [
     'Expression',

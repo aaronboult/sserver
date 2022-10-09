@@ -1,7 +1,7 @@
 """Template tags called in templates."""
 
 
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from sserver.templating import (
     register_inline_tag,
     register_block_tag,

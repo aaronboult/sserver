@@ -1,6 +1,7 @@
 """Definitions for a parse tree."""
 
-from typing import Any, List, Optional, Union, Dict
+
+from typing import Any, List, Optional, Union
 from sserver.parse import exception
 from sserver.parse.base_literal import (
     Evaluatable,
