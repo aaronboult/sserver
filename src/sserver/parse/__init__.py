@@ -15,6 +15,16 @@ from sserver.parse.parse_tree import (
 )
 from sserver.parse.base_literal import Context
 
+
+def load():
+    """Registers builtin literal classes."""
+
+    # @future Load literal classes from apps / project
+
+    # Ensure built in literal classes are registered
+    from sserver.parse import literal  # noqa: F401
+
+
 __all__ = [
     'Identifier',
     'Expression',

@@ -77,6 +77,7 @@ def load():
 
     # @future Load template tags from apps / project
 
+    # Ensure built in template tags are registered
     from sserver.templating import template_tag  # noqa: F401
 
 
