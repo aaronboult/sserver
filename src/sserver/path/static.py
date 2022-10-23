@@ -10,7 +10,7 @@ from sserver.path import path
 from sserver.util import cache
 from sserver.util import config
 from sserver.util import log
-from shutil import copy
+# from shutil import copy
 
 
 def load():
@@ -59,7 +59,8 @@ def load():
                         PATH_TO_CLONE,
                     )
 
-                    # @future Config value for copying static files to different directory
+                    # @future Config value for copying static files
+                    # @future to different directory
                     # @future Allow handling custom static files, e.g. .scss
                     # # Ensure file directory exists in static folder
                     # STATIC_FILE_DESTINATION = os.path.join(
