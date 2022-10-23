@@ -131,7 +131,7 @@ def get_static_file_contents(path: str) -> Optional[Union[str, str]]:
     static_path = get_static_file_path(path)
 
     if static_path is not None:
-        with open(static_path, 'r') as static_file:
+        with open(static_path, 'rb') as static_file:
             return static_file.read(), static_path
 
     return None
@@ -148,6 +148,9 @@ def get_static_file(path: str) -> str:
 
     # Determine content type
     mime_type = mimetypes.guess_type(static_file_path)[0]
+
+    if mime_type is None:
+        mime_type = 'text/plain'
 
     # Return static file
     return {
