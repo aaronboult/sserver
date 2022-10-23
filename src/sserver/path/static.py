@@ -38,9 +38,7 @@ def load():
 
         # Resolve static paths
         PATH_TO_CLONE_LIST = [
-            os.path.join(APP_PATH, APP_CONFIG.get('static_image_folder')),
-            os.path.join(APP_PATH, APP_CONFIG.get('static_css_folder')),
-            os.path.join(APP_PATH, APP_CONFIG.get('static_js_folder')),
+            os.path.join(APP_PATH, APP_CONFIG.get('static_folder')),
         ]
 
         for PATH_TO_CLONE in PATH_TO_CLONE_LIST:
@@ -62,6 +60,7 @@ def load():
                     )
 
                     # @future Config value for copying static files to different directory
+                    # @future Allow handling custom static files, e.g. .scss
                     # # Ensure file directory exists in static folder
                     # STATIC_FILE_DESTINATION = os.path.join(
                     #     STATIC_PATH,
