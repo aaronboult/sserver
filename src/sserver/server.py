@@ -1,5 +1,5 @@
 import json
-from urllib.parse import parse_qs as parse_query_string
+from urllib.parse import parse_qsl as parse_query_string
 from typing import Callable, Dict, List, Optional
 from sserver import templating, parse
 from sserver.mixin.option_mixin import OptionMixin
@@ -168,7 +168,9 @@ class BaseServer(OptionMixin):
         request_body = {}
 
         if method == 'GET':
-            request_body = parse_query_string(environment.get('QUERY_STRING'))
+            request_body = dict(
+                parse_query_string(environment.get('QUERY_STRING')),
+            )
 
         else:
             environment = self.getOption('environment')
