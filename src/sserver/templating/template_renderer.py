@@ -327,14 +327,14 @@ class TemplateRenderer:
 
         template_str = self._template.template_str
 
+        if template_str is None:
+            return ''
+
         # Remove comments
         template_str = re.sub(_COMMENT_TAG_SYNTAX, '', template_str)
 
         # Preprocess the template string
         template_str = self._preprocess(template_str, context)
-
-        if template_str is None:
-            return ''
 
         return template_str
 
