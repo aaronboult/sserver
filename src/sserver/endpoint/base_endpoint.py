@@ -45,7 +45,7 @@ class BaseEndpoint(OptionMixin):
             context,
         )
 
-    def post(self) -> str:
+    def post(self, **response) -> str:
         """Handles HTTP POST requests.
 
         Note:
@@ -55,9 +55,7 @@ class BaseEndpoint(OptionMixin):
             `str`: An empty string by default.
         """
 
-        raise NotImplementedError('BaseEndpoint.post() not implemented')
-
-        return ''
+        return response
 
     def put(self) -> str:
         """Handles HTTP PUT requests.
@@ -71,8 +69,6 @@ class BaseEndpoint(OptionMixin):
 
         raise NotImplementedError('BaseEndpoint.put() not implemented')
 
-        return ''
-
     def patch(self) -> str:
         """Handles HTTP PATCH requests.
 
@@ -85,8 +81,6 @@ class BaseEndpoint(OptionMixin):
 
         raise NotImplementedError('BaseEndpoint.patch() not implemented')
 
-        return ''
-
     def delete(self) -> str:
         """Handles HTTP DELETE requests.
 
@@ -98,8 +92,6 @@ class BaseEndpoint(OptionMixin):
         """
 
         raise NotImplementedError('BaseEndpoint.delete() not implemented')
-
-        return ''
 
     def get_app_name(self) -> str:
         """Gets the app name of the calling endpoint.
