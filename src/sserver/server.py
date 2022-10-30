@@ -1,4 +1,5 @@
 import json
+from urllib.parse import parse_qs as parse_query_string
 from typing import Callable, Dict, List, Optional
 from sserver import templating, parse
 from sserver.mixin.option_mixin import OptionMixin
@@ -134,7 +135,7 @@ class BaseServer(OptionMixin):
 
         environment = self.getOption('environment')
 
-        uri = environment.get('REQUEST_URI')
+        uri = environment.get('PATH_INFO')
 
         matched_route = cache.get(uri)
 
@@ -166,15 +167,19 @@ class BaseServer(OptionMixin):
         # Read request body
         request_body = {}
 
-        environment = self.getOption('environment')
-        content_length = environment.get('CONTENT_LENGTH')
-        if content_length is not None:
-            # Read request body, decode from bytes and parse to json
-            request_body = json.loads(
-                environment['wsgi.input'].read(
-                    int(content_length)
-                ).decode('utf-8')
-            )
+        if method == 'GET':
+            request_body = parse_query_string(environment.get('QUERY_STRING'))
+
+        else:
+            environment = self.getOption('environment')
+            content_length = environment.get('CONTENT_LENGTH')
+            if content_length is not None:
+                # Read request body, decode from bytes and parse to json
+                request_body = json.loads(
+                    environment['wsgi.input'].read(
+                        int(content_length)
+                    ).decode('utf-8')
+                )
 
         if method in method_map:
             content = method_map[method](request_body)
