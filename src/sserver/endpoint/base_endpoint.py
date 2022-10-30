@@ -1,5 +1,6 @@
 """Provides bases for endpoint functionality."""
 
+import json
 from typing import Any, Dict, Union
 from sserver.mixin.option_mixin import OptionMixin
 from sserver.util import config, module
@@ -16,11 +17,12 @@ class BaseEndpoint(OptionMixin):
 
     template_name: str = None
 
-    def get(self, **context: Any) -> str:
+    def get(self, request: dict, **context: Any) -> str:
         """Handles HTTP GET requests.
         To be overriden by subclasses to provide custom functionality.
 
         Args:
+            request (`dict`): The request data.
             **context (`Any`, optional): Keyword arguments passed to the
                 `template_name` as `context` if the `template_name` is set.
 
@@ -35,7 +37,7 @@ class BaseEndpoint(OptionMixin):
 
         # Return context if no template_name set
         if template_name is None:
-            return context
+            return self.json_response(**context)
 
         if not isinstance(template_name, str):
             raise TypeError('template_name must be of type str')
@@ -45,23 +47,27 @@ class BaseEndpoint(OptionMixin):
             context,
         )
 
-    def post(self, **response) -> str:
+    def post(self, request: dict, **response) -> str:
         """Handles HTTP POST requests.
 
-        Note:
-            To be overriden by subclasses to provide custom functionality.
+        Args:
+            request (`dict`): The request data.
+            **response (`Any`, optional): The response data.
 
         Returns:
             `str`: An empty string by default.
         """
 
-        return response
+        return self.json_response(**response)
 
-    def put(self) -> str:
+    def put(self, request: dict) -> str:
         """Handles HTTP PUT requests.
 
         Note:
             To be overriden by subclasses to provide custom functionality.
+
+        Args:
+            request (`dict`): The request data.
 
         Returns:
             `str`: An empty string by default.
@@ -69,11 +75,14 @@ class BaseEndpoint(OptionMixin):
 
         raise NotImplementedError('BaseEndpoint.put() not implemented')
 
-    def patch(self) -> str:
+    def patch(self, request: dict) -> str:
         """Handles HTTP PATCH requests.
 
         Note:
             To be overriden by subclasses to provide custom functionality.
+
+        Args:
+            request (`dict`): The request data.
 
         Returns:
             `str`: An empty string by default.
@@ -81,17 +90,32 @@ class BaseEndpoint(OptionMixin):
 
         raise NotImplementedError('BaseEndpoint.patch() not implemented')
 
-    def delete(self) -> str:
+    def delete(self, request: dict) -> str:
         """Handles HTTP DELETE requests.
 
         Note:
             To be overriden by subclasses to provide custom functionality.
+
+        Args:
+            request (`dict`): The request data.
 
         Returns:
             `str`: An empty string by default.
         """
 
         raise NotImplementedError('BaseEndpoint.delete() not implemented')
+
+    def json_response(self, **response) -> str:
+        """Returns a JSON response.
+
+        Args:
+            **response (`Any`, optional): The response data.
+
+        Returns:
+            `str`: The JSON response.
+        """
+
+        return json.dumps(response)
 
     def get_app_name(self) -> str:
         """Gets the app name of the calling endpoint.
