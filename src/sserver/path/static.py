@@ -85,7 +85,7 @@ def load():
                     static_file_key = os.path.join(
                         PATH_TO_CLONE,
                         RELATIVE_PATH,
-                    ).replace(APP_FOLDER, '')
+                    ).replace(APP_FOLDER, '', 1)
 
                     static_path_map[static_file_key] = FILE_PATH
 
